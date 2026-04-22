@@ -54,7 +54,7 @@ python novalpie.py
 
 ## 关键配置项
 
-以下配置都在 `esj/novalpie.py` 顶部：
+以下配置都在 `novalpie.py` 顶部：
 
 - `bookURL`：起始章节链接（必改）
 - `base_url`：站点根地址，需与 `bookURL` 同域名
