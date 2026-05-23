@@ -1,4 +1,4 @@
-﻿# coding=utf-8
+# coding=utf-8
 """
 novalpie.cc novel downloader 
 
@@ -43,47 +43,46 @@ except Exception:  # pragma: no cover
 # Config (edit here)
 # ---------------------------------------------------------------------------
 
-# Start chapter url.
-bookURL = "https://novalpie.cc/book/357469/9078660"
+# bookURL：起始章节链接（必改）
+bookURL = "https://novalpie.cc/book/353690/8853740"
 
-# Must match bookURL domain.
+# base_url：站点根地址，需与 bookURL 同域名
 base_url = "https://novalpie.cc/"
 
-# Optional cookie file. First line should be:
-# key1=value1; key2=value2; ...
+# cookieFilePath：Cookie 文件路径（默认 ./novalpie.txt）
 cookieFilePath = "./novalpie.txt"
 
-# Browser mode.
-headless = False
+# headless：是否无头运行浏览器（True/False）
+headless = True
 
-# Chapter interval delay (seconds). Applied before each extraction.
+# chapterDelayMinSec / chapterDelayMaxSec：章节访问间隔（秒）
 chapterDelayMinSec = 2.0
 chapterDelayMaxSec = 3.0
 
-# First chapter often loads slower.
+# firstChapterExtraWaitSec：首章额外等待时间（秒）
 firstChapterExtraWaitSec = 10.0
 
-# Max wait for one chapter content to become readable.
+# chapterReadyTimeoutSec：单章正文等待超时（秒）
 chapterReadyTimeoutSec = 35.0
 
-# Network timeout for page.goto.
-pageGotoTimeoutMs = 90000
+# pageGotoTimeoutMs：页面加载超时（毫秒）
+pageGotoTimeoutMs = 130000
 
-# Retry count for one chapter.
-retryPerChapter = 2
+# retryPerChapter：单章失败重试次数
+retryPerChapter = 4
 
-# 0 means no limit.
-maxChapters = 5
+# maxChapters：最多抓取章节数，0 表示不限制
+maxChapters = 0
 
-# If True, download from chapter in bookURL to the end.
-# If False, download from chapter 1.
+# startFromCurrentChapter：
+#   True  从 bookURL 指向章节开始抓
+#   False 从第 1 章开始抓
 startFromCurrentChapter = True
 
-# If True, keep chapters with extraction failures as placeholders in txt/epub.
-# If False, skip failed chapters.
-keepFailedChapterPlaceholder = False
+# keepFailedChapterPlaceholder：是否保留抓取失败章节占位文本
+keepFailedChapterPlaceholder = True
 
-# Output folders.
+# epubOutputDir / txtOutputDir：输出目录
 epubOutputDir = "./epubBooks_novalpie"
 txtOutputDir = "./txtBooks_novalpie"
 
@@ -144,6 +143,15 @@ class ChapterData:
     url: str
     chapter_id: int
     image_urls: list[str] = field(default_factory=list)
+
+
+@dataclass
+class FailedChapter:
+    index: int
+    title: str
+    url: str
+    chapter_id: int
+    reason: str
 
 
 @dataclass
@@ -490,7 +498,7 @@ def parse_chapter_items_from_api_payload(payload: Any, book_id: int) -> list[Cha
 
 def fetch_chapter_list_via_api(session: requests.Session, book_id: int) -> list[ChapterRef]:
     api_url = absolute_url(f"/api/novels/{book_id}/chapters")
-    resp = session.get(api_url, timeout=(10, 35))
+    resp = session.get(api_url, timeout=(10, chapterReadyTimeoutSec))
     resp.raise_for_status()
     payload = resp.json()
     return parse_chapter_items_from_api_payload(payload, book_id)
@@ -513,7 +521,7 @@ def fetch_chapter_list_via_html(session: requests.Session, book_id: int, start_u
     seq = 0
     for u in candidates:
         try:
-            r = session.get(u, timeout=(10, 35))
+            r = session.get(u, timeout=(10, chapterReadyTimeoutSec))
             r.raise_for_status()
         except Exception:
             continue
@@ -568,7 +576,7 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
     candidates = [absolute_url(f"/book/{book_id}"), chapter_url]
     for u in candidates:
         try:
-            r = session.get(u, timeout=(10, 35))
+            r = session.get(u, timeout=(chapterReadyTimeoutSec, chapterReadyTimeoutSec))
             r.raise_for_status()
         except Exception:
             continue
@@ -883,7 +891,7 @@ def wait_for_chapter_text(
         )
 
         if current_title and not found_current:
-            page.wait_for_timeout(350)
+            page.wait_for_timeout(chapterReadyTimeoutSec * 1000)
             continue
 
         if found_current:
@@ -904,7 +912,7 @@ def wait_for_chapter_text(
         if current_len >= 120:
             return best_title, best_text, best_images
 
-        page.wait_for_timeout(350)
+        page.wait_for_timeout(chapterReadyTimeoutSec * 1000)    
 
     if best_len >= 80:
         return best_title, best_text, best_images
@@ -935,7 +943,7 @@ def guess_image_mime(content_type: str, ext: str) -> str:
 
 def download_image_blob(session: requests.Session, url: str) -> tuple[bytes, str, str] | None:
     try:
-        resp = session.get(url, timeout=(10, 45), headers={"Referer": base_url})
+        resp = session.get(url, timeout=(10, chapterReadyTimeoutSec), headers={"Referer": base_url})    
         resp.raise_for_status()
     except Exception:
         return None
@@ -1059,11 +1067,12 @@ def print_progress(current: int, total: int, title: str) -> None:
 def download_chapters_with_browser(
     chapters: list[ChapterRef],
     cookie_line: str,
-) -> list[ChapterData]:
+) -> tuple[list[ChapterData], list[FailedChapter]]:
     if sync_playwright is None:
         raise RuntimeError("playwright is not installed")
 
     results: list[ChapterData] = []
+    failed: list[FailedChapter] = []
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=headless)
         context = browser.new_context(user_agent=DEFAULT_HEADERS["User-Agent"], locale="zh-CN")
@@ -1075,6 +1084,7 @@ def download_chapters_with_browser(
         for i, ch in enumerate(chapters, start=1):
             print_progress(i, total, f"Fetching {ch.url}")
             done = False
+            last_error = ""
             for attempt in range(1, retryPerChapter + 2):
                 try:
                     page.goto(ch.url, wait_until="domcontentloaded", timeout=pageGotoTimeoutMs)
@@ -1110,13 +1120,14 @@ def download_chapters_with_browser(
                     done = True
                     break
                 except Exception as e:
-                    print(f"  [!] attempt {attempt} failed: {e}")
+                    last_error = str(e)
+                    print(f"  [!] attempt {attempt} failed: {last_error}")
                     if attempt <= retryPerChapter:
                         time.sleep(1.0 * attempt)
                         continue
                     if keepFailedChapterPlaceholder:
                         title = ch.title or f"Chapter {i}"
-                        text = f"[Failed to extract]\nURL: {ch.url}\nReason: {e}"
+                        text = f"[Failed to extract]\nURL: {ch.url}\nReason: {last_error}"
                         results.append(
                             ChapterData(
                                 title=title,
@@ -1128,12 +1139,22 @@ def download_chapters_with_browser(
                         )
                     break
 
-            if not done and not keepFailedChapterPlaceholder:
-                print(f"  [x] skip chapter: {ch.url}")
+            if not done:
+                failed.append(
+                    FailedChapter(
+                        index=i,
+                        title=ch.title or f"Chapter {i}",
+                        url=ch.url,
+                        chapter_id=ch.chapter_id,
+                        reason=last_error or "unknown",
+                    )
+                )
+                if not keepFailedChapterPlaceholder:
+                    print(f"  [x] skip chapter: {ch.url}")
 
         context.close()
         browser.close()
-    return results
+    return results, failed
 def ensure_domain_consistency() -> None:
     parsed_base = urlparse(base_url)
     parsed_book = urlparse(bookURL)
@@ -1192,7 +1213,7 @@ def main() -> None:
         print(f"[*] Author: {meta.author}")
     print(f"[*] Chapters to download: {len(chapter_refs)}")
 
-    chapters = download_chapters_with_browser(chapter_refs, cookie_line)
+    chapters, failed_chapters = download_chapters_with_browser(chapter_refs, cookie_line)
     if not chapters:
         print("[x] All chapter downloads failed; no output generated.")
         sys.exit(4)
@@ -1201,6 +1222,26 @@ def main() -> None:
     Path(txtOutputDir).mkdir(parents=True, exist_ok=True)
 
     file_stem = clean_filename(meta.title)
+
+    if failed_chapters:
+        failed_path = Path(txtOutputDir) / f"{file_stem}_failed.txt"
+        lines: list[str] = []
+        lines.append(f"Failed Chapters Report")
+        lines.append(f"Book: {meta.title}")
+        lines.append(f"Author: {meta.author or 'unknown'}")
+        lines.append(f"Total failed: {len(failed_chapters)}")
+        lines.append("=" * 60)
+        for fc in failed_chapters:
+            lines.append(f"")
+            lines.append(f"  [#{fc.index}] {fc.title}")
+            lines.append(f"  URL: {fc.url}")
+            lines.append(f"  Chapter ID: {fc.chapter_id}")
+            lines.append(f"  Reason: {fc.reason}")
+        lines.append(f"")
+        lines.append("=" * 60)
+        failed_path.write_text("\n".join(lines), encoding="utf-8")
+        print(f"[*] Failed chapters report: {failed_path.resolve()}")
+
     epub_path = Path(epubOutputDir) / f"{file_stem}.epub"
     txt_path = Path(txtOutputDir) / f"{file_stem}.txt"
 
@@ -1211,6 +1252,7 @@ def main() -> None:
     print(f"[*] EPUB: {epub_path.resolve()}")
     print(f"[*] TXT : {txt_path.resolve()}")
     print(f"[*] Success chapters: {len(chapters)}")
+    print(f"[*] Failed chapters: {len(failed_chapters)}")
 
 
 if __name__ == "__main__":
