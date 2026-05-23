@@ -82,9 +82,10 @@ startFromCurrentChapter = True
 # keepFailedChapterPlaceholder：是否保留抓取失败章节占位文本
 keepFailedChapterPlaceholder = True
 
-# epubOutputDir / txtOutputDir：输出目录
+# epubOutputDir / txtOutputDir / cacheOutputDir：输出目录
 epubOutputDir = "./epubBooks_novalpie"
 txtOutputDir = "./txtBooks_novalpie"
+cacheOutputDir = "./cache_novalpie"
 
 
 DEFAULT_HEADERS = {
@@ -1055,6 +1056,48 @@ def save_txt(book_meta: BookMeta, chapters: list[ChapterData], output_path: Path
     output_path.write_text("\n".join(lines), encoding="utf-8")
 
 
+def get_cache_path(book_id: int) -> Path:
+    return Path(cacheOutputDir) / f"book_{book_id}_cache.json"
+
+
+def load_chapter_cache(book_id: int) -> dict[int, ChapterData]:
+    cache_path = get_cache_path(book_id)
+    if not cache_path.exists():
+        return {}
+    try:
+        data = cache_path.read_text(encoding="utf-8")
+        import json
+        cached = json.loads(data)
+        result = {}
+        for cid, ch_data in cached.items():
+            result[int(cid)] = ChapterData(
+                title=ch_data.get("title", ""),
+                text=ch_data.get("text", ""),
+                url=ch_data.get("url", ""),
+                chapter_id=ch_data.get("chapter_id", 0),
+                image_urls=ch_data.get("image_urls", []),
+            )
+        return result
+    except Exception:
+        return {}
+
+
+def save_chapter_cache(book_id: int, chapters: list[ChapterData]) -> None:
+    cache_path = get_cache_path(book_id)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    import json
+    cache_data = {}
+    for ch in chapters:
+        cache_data[ch.chapter_id] = {
+            "title": ch.title,
+            "text": ch.text,
+            "url": ch.url,
+            "chapter_id": ch.chapter_id,
+            "image_urls": ch.image_urls,
+        }
+    cache_path.write_text(json.dumps(cache_data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
 def sleep_between(min_sec: float, max_sec: float) -> None:
     delay = max(min_sec, min(max_sec, random.uniform(min_sec, max_sec)))
     time.sleep(delay)
@@ -1067,7 +1110,8 @@ def print_progress(current: int, total: int, title: str) -> None:
 def download_chapters_with_browser(
     chapters: list[ChapterRef],
     cookie_line: str,
-) -> tuple[list[ChapterData], list[FailedChapter]]:
+    chapter_cache: dict[int, ChapterData],
+) -> tuple[list[ChapterData], list[FailedChapter], dict[int, ChapterData]]:
     if sync_playwright is None:
         raise RuntimeError("playwright is not installed")
 
@@ -1082,6 +1126,11 @@ def download_chapters_with_browser(
 
         total = len(chapters)
         for i, ch in enumerate(chapters, start=1):
+            if ch.chapter_id in chapter_cache:
+                cached_ch = chapter_cache[ch.chapter_id]
+                results.append(cached_ch)
+                print(f"  [=] cached: {cached_ch.title} ({len(cached_ch.text)} chars, images={len(cached_ch.image_urls)})")
+                continue
             print_progress(i, total, f"Fetching {ch.url}")
             done = False
             last_error = ""
@@ -1107,15 +1156,15 @@ def download_chapters_with_browser(
                     if not text:
                         raise RuntimeError("empty chapter text")
 
-                    results.append(
-                        ChapterData(
-                            title=title,
-                            text=text,
-                            url=ch.url,
-                            chapter_id=ch.chapter_id,
-                            image_urls=image_urls,
-                        )
+                    chapter_data = ChapterData(
+                        title=title,
+                        text=text,
+                        url=ch.url,
+                        chapter_id=ch.chapter_id,
+                        image_urls=image_urls,
                     )
+                    results.append(chapter_data)
+                    chapter_cache[ch.chapter_id] = chapter_data
                     print(f"  [+] ok: {title} ({len(text)} chars, images={len(image_urls)})")
                     done = True
                     break
@@ -1154,7 +1203,7 @@ def download_chapters_with_browser(
 
         context.close()
         browser.close()
-    return results, failed
+    return results, failed, chapter_cache
 def ensure_domain_consistency() -> None:
     parsed_base = urlparse(base_url)
     parsed_book = urlparse(bookURL)
@@ -1178,6 +1227,10 @@ def main() -> None:
         sys.exit(1)
 
     session = make_session(cookie_line)
+
+    chapter_cache = load_chapter_cache(book_id)
+    if chapter_cache:
+        print(f"[*] Loaded {len(chapter_cache)} cached chapters")
 
     print(f"[*] book_id={book_id}, start_chapter_id={start_chapter_id}")
     print("[*] Fetching chapter list ...")
@@ -1213,10 +1266,13 @@ def main() -> None:
         print(f"[*] Author: {meta.author}")
     print(f"[*] Chapters to download: {len(chapter_refs)}")
 
-    chapters, failed_chapters = download_chapters_with_browser(chapter_refs, cookie_line)
+    chapters, failed_chapters, chapter_cache = download_chapters_with_browser(chapter_refs, cookie_line, chapter_cache)
     if not chapters:
         print("[x] All chapter downloads failed; no output generated.")
         sys.exit(4)
+
+    save_chapter_cache(book_id, list(chapter_cache.values()))
+    print(f"[*] Cached {len(chapter_cache)} chapters")
 
     Path(epubOutputDir).mkdir(parents=True, exist_ok=True)
     Path(txtOutputDir).mkdir(parents=True, exist_ok=True)
