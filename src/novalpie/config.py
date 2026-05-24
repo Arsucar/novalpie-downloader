@@ -124,3 +124,10 @@ class BookMeta:
     description: str = ""
     tags: list[str] = field(default_factory=list)
     cover_url: str = ""
+
+def run() -> None:
+    import run
+    run.main()
+
+if __name__ == "__main__":
+    run()

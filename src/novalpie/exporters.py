@@ -46,7 +46,7 @@ def build_epub(
         book.add_metadata('DC', 'description', book_meta.description)
 
     toc_items = []
-    spine_items = ["nav"]
+    spine_items = []
 
     # 下载封面
     cover_image_data = None
