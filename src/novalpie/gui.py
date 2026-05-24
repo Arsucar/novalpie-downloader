@@ -1,5 +1,5 @@
 # coding=utf-8
-"""NovalPie GUI - 基于 customtkinter 的图形界面"""
+"""NovalPie GUI - 基于 customtkinter 的现代化图形界面"""
 
 from __future__ import annotations
 
@@ -21,12 +21,28 @@ from . import cache
 from . import exporters
 
 
+# ── 色彩常量 ────────────────────────────────────────────────
+
+class Colors:
+    PRIMARY = "#2B87E3"
+    PRIMARY_HOVER = "#1E6CB8"
+    SUCCESS = "#27AE60"
+    SUCCESS_HOVER = "#1E8449"
+    DANGER = "#E74C3C"
+    DANGER_HOVER = "#C0392B"
+    CARD_LIGHT = "gray95"
+    CARD_DARK = "gray17"
+    CARD_BORDER_LIGHT = "gray85"
+    CARD_BORDER_DARK = "gray28"
+
+
+# ── 日志重定向 ──────────────────────────────────────────────
+
 class TextHandler(io.TextIOBase):
     """将 write 调用转发到 GUI 日志区域"""
 
     def __init__(self, callback: Callable[[str], None]):
         self.callback = callback
-        self.buffer = ""
 
     def write(self, text: str) -> int:
         if not text:
@@ -38,187 +54,415 @@ class TextHandler(io.TextIOBase):
         pass
 
 
+# ── 主应用 ──────────────────────────────────────────────────
+
 class NovalPieApp(ctk.CTk):
+    # 默认字体大小
+    DEFAULT_FONT_SIZE = 14
+    FONT_SIZE_MIN = 10
+    FONT_SIZE_MAX = 24
+
     def __init__(self):
         super().__init__()
-        self.title("NovalPie Downloader")
-        self.geometry("780x680")
-        self.minsize(680, 560)
+        self.title("NovalPie 小说下载器")
+        self.geometry("820x750")
+        self.minsize(720, 620)
 
         self._stop_event = threading.Event()
         self._running = False
+        self._font_size = self.DEFAULT_FONT_SIZE
+
+        # 收集所有需要随字体大小变化的控件
+        self._font_widgets: list[tuple] = []  # (widget, type, extra)
 
         self._build_ui()
-        self._load_config_to_ui()
+
+    # ── 字体辅助 ────────────────────────────────────────────
+
+    def _font(self, size_offset: int = 0, weight: str = "normal") -> ctk.CTkFont:
+        return ctk.CTkFont(size=self._font_size + size_offset, weight=weight)
+
+    def _register_font(self, widget, wtype: str, extra: dict | None = None):
+        """注册控件以便字体大小变化时批量更新"""
+        self._font_widgets.append((widget, wtype, extra or {}))
+
+    def _apply_font_size(self, size: int):
+        """动态更新所有注册控件的字体"""
+        self._font_size = size
+        for widget, wtype, extra in self._font_widgets:
+            try:
+                offset = extra.get("offset", 0)
+                weight = extra.get("weight", "normal")
+                new_font = ctk.CTkFont(size=size + offset, weight=weight)
+                if wtype == "label":
+                    widget.configure(font=new_font)
+                elif wtype == "entry":
+                    widget.configure(font=new_font)
+                elif wtype == "button":
+                    widget.configure(font=new_font)
+                elif wtype == "textbox":
+                    widget.configure(font=ctk.CTkFont(
+                        family=extra.get("family", "Consolas"),
+                        size=size + extra.get("offset", -2),
+                    ))
+                elif wtype == "checkbox":
+                    widget.configure(font=new_font)
+                elif wtype == "switch":
+                    widget.configure(font=new_font)
+                elif wtype == "slider_label":
+                    widget.configure(font=new_font, text=f"字体大小: {size}")
+            except Exception:
+                pass
 
     # ── UI 构建 ──────────────────────────────────────────────
 
     def _build_ui(self):
-        # 顶部标题
-        title_label = ctk.CTkLabel(
-            self, text="NovalPie 小说下载器",
-            font=ctk.CTkFont(size=22, weight="bold"),
-        )
-        title_label.pack(pady=(14, 4))
-
         # 主容器
-        main_frame = ctk.CTkScrollableFrame(self)
-        main_frame.pack(fill="both", expand=True, padx=16, pady=(4, 8))
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)   # Tabview 区域可扩展
+        self.grid_rowconfigure(2, weight=0)   # 底部栏固定
 
-        # ── 基本设置 ──
-        self._section(main_frame, "基本设置")
+        # ========== 顶部标题栏 ==========
+        top_frame = ctk.CTkFrame(self, fg_color="transparent")
+        top_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=(15, 5))
+        top_frame.grid_columnconfigure(1, weight=1)
 
-        self.entry_book_url = self._labeled_entry(
-            main_frame, "书籍章节链接 (bookURL):", config.bookURL
+        title_label = ctk.CTkLabel(
+            top_frame,
+            text="NovalPie 小说下载器",
+            font=self._font(8, "bold"),
+            text_color=Colors.PRIMARY,
         )
-        self.entry_base_url = self._labeled_entry(
-            main_frame, "站点根地址 (base_url):", config.base_url
+        title_label.grid(row=0, column=0, sticky="w")
+        self._register_font(title_label, "label", {"offset": 8, "weight": "bold"})
+
+        subtitle_label = ctk.CTkLabel(
+            top_frame,
+            text="轻松下载你喜爱的小说",
+            font=self._font(-2),
+            text_color="gray60",
         )
-        self.entry_cookie = self._labeled_entry(
-            main_frame, "Cookie 文件路径:", config.cookieFilePath
+        subtitle_label.grid(row=0, column=1, sticky="w", padx=(10, 0))
+        self._register_font(subtitle_label, "label", {"offset": -2})
+
+        # 字体大小控制
+        font_ctrl = ctk.CTkFrame(top_frame, fg_color="transparent")
+        font_ctrl.grid(row=0, column=2, sticky="e")
+
+        self.label_font_size = ctk.CTkLabel(
+            font_ctrl,
+            text=f"字体大小: {self._font_size}",
+            font=self._font(-2),
+            width=110,
+        )
+        self.label_font_size.pack(side="left", padx=(0, 6))
+        self._register_font(self.label_font_size, "slider_label", {"offset": -2})
+
+        self.slider_font = ctk.CTkSlider(
+            font_ctrl,
+            from_=self.FONT_SIZE_MIN,
+            to=self.FONT_SIZE_MAX,
+            number_of_steps=14,
+            width=120,
+            command=self._on_font_size_change,
+        )
+        self.slider_font.set(self._font_size)
+        self.slider_font.pack(side="left")
+
+        # ========== Tabview (设置页 + 日志页) ==========
+        self.tabview = ctk.CTkTabview(
+            self, corner_radius=12,
+            fg_color=(Colors.CARD_LIGHT, Colors.CARD_DARK),
+        )
+        self.tabview.grid(row=1, column=0, sticky="nsew", padx=20, pady=(5, 5))
+
+        self.tabview.add("设置")
+        self.tabview.add("日志")
+
+        # ----- 设置标签页内容 -----
+        settings_tab = self.tabview.tab("设置")
+        settings_tab.grid_columnconfigure(0, weight=1)
+        settings_tab.grid_rowconfigure(0, weight=1)
+
+        scroll_frame = ctk.CTkScrollableFrame(
+            settings_tab, corner_radius=0, fg_color="transparent",
+        )
+        scroll_frame.grid(row=0, column=0, sticky="nsew")
+        scroll_frame.grid_columnconfigure(0, weight=1)
+
+        # ── 基本设置卡片 ──
+        basic_card = self._create_card(scroll_frame, "基本设置", "🔗")
+        basic_card.grid_columnconfigure(0, weight=1)
+
+        self.entry_book_url = self._create_input_group(
+            basic_card, "书籍章节链接 (bookURL)", config.bookURL,
+            placeholder="https://...", required=True,
+        )
+        self.entry_base_url = self._create_input_group(
+            basic_card, "站点根地址 (base_url)", config.base_url,
+            placeholder="https://...",
+        )
+        self.entry_cookie = self._create_input_group(
+            basic_card, "Cookie 文件路径", config.cookieFilePath,
+            placeholder="cookie.txt",
         )
 
-        # ── 下载设置 ──
-        self._section(main_frame, "下载设置")
+        # ── 下载设置卡片 ──
+        dl_card = self._create_card(scroll_frame, "下载设置", "⚙️")
+        dl_card.grid_columnconfigure((0, 1), weight=1)
 
-        row1 = ctk.CTkFrame(main_frame, fg_color="transparent")
-        row1.pack(fill="x", pady=2)
-        self.entry_delay_min = self._labeled_entry_inline(
-            row1, "章节间隔(秒) 最小:", str(config.chapterDelayMinSec)
+        self.entry_delay_min = self._create_inline_input(
+            dl_card, "章节间隔(秒) 最小", str(config.chapterDelayMinSec), row=0, col=0,
         )
-        self.entry_delay_max = self._labeled_entry_inline(
-            row1, "最大:", str(config.chapterDelayMaxSec)
+        self.entry_delay_max = self._create_inline_input(
+            dl_card, "最大", str(config.chapterDelayMaxSec), row=0, col=1,
         )
-
-        row2 = ctk.CTkFrame(main_frame, fg_color="transparent")
-        row2.pack(fill="x", pady=2)
-        self.entry_timeout = self._labeled_entry_inline(
-            row2, "章节超时(秒):", str(config.chapterReadyTimeoutSec)
+        self.entry_timeout = self._create_inline_input(
+            dl_card, "章节超时(秒)", str(config.chapterReadyTimeoutSec), row=1, col=0,
         )
-        self.entry_retry = self._labeled_entry_inline(
-            row2, "重试次数:", str(config.retryPerChapter)
+        self.entry_retry = self._create_inline_input(
+            dl_card, "重试次数", str(config.retryPerChapter), row=1, col=1,
         )
-
-        row3 = ctk.CTkFrame(main_frame, fg_color="transparent")
-        row3.pack(fill="x", pady=2)
-        self.entry_max_chapters = self._labeled_entry_inline(
-            row3, "最大章节数 (0=不限):", str(config.maxChapters)
+        self.entry_max_chapters = self._create_inline_input(
+            dl_card, "最大章节数 (0=不限)", str(config.maxChapters), row=2, col=0,
         )
-        self.entry_first_wait = self._labeled_entry_inline(
-            row3, "首章额外等待(秒):", str(config.firstChapterExtraWaitSec)
+        self.entry_first_wait = self._create_inline_input(
+            dl_card, "首章额外等待(秒)", str(config.firstChapterExtraWaitSec), row=2, col=1,
         )
 
-        # ── 选项开关 ──
-        self._section(main_frame, "选项")
-
-        opt_frame = ctk.CTkFrame(main_frame, fg_color="transparent")
-        opt_frame.pack(fill="x", pady=2)
+        # ── 选项卡片 ──
+        opt_card = self._create_card(scroll_frame, "选项", "🎛️")
+        opt_card.grid_columnconfigure((0, 1), weight=1)
 
         self.var_headless = ctk.BooleanVar(value=config.headless)
-        ctk.CTkCheckBox(opt_frame, text="无头模式 (headless)", variable=self.var_headless).pack(
-            side="left", padx=(0, 16)
-        )
+        self._create_switch(opt_card, "无头模式 (headless)", self.var_headless, row=0, col=0)
 
         self.var_from_current = ctk.BooleanVar(value=config.startFromCurrentChapter)
-        ctk.CTkCheckBox(opt_frame, text="从当前章节开始", variable=self.var_from_current).pack(
-            side="left", padx=(0, 16)
-        )
+        self._create_switch(opt_card, "从当前章节开始", self.var_from_current, row=0, col=1)
 
         self.var_keep_failed = ctk.BooleanVar(value=config.keepFailedChapterPlaceholder)
-        ctk.CTkCheckBox(opt_frame, text="保留失败章节占位", variable=self.var_keep_failed).pack(
-            side="left"
+        self._create_switch(opt_card, "保留失败章节占位", self.var_keep_failed, row=1, col=0)
+
+        # ── 输出目录卡片 ──
+        out_card = self._create_card(scroll_frame, "输出目录", "📁")
+        out_card.grid_columnconfigure(0, weight=1)
+
+        self.entry_epub_dir = self._create_input_group(
+            out_card, "EPUB 输出目录", config.epubOutputDir,
+        )
+        self.entry_txt_dir = self._create_input_group(
+            out_card, "TXT 输出目录", config.txtOutputDir,
+        )
+        self.entry_cache_dir = self._create_input_group(
+            out_card, "缓存目录", config.cacheOutputDir,
         )
 
-        # ── 输出目录 ──
-        self._section(main_frame, "输出目录")
+        # ----- 日志标签页内容 -----
+        log_tab = self.tabview.tab("日志")
+        log_tab.grid_columnconfigure(0, weight=1)
+        log_tab.grid_rowconfigure(0, weight=1)
 
-        self.entry_epub_dir = self._labeled_entry(
-            main_frame, "EPUB 输出目录:", config.epubOutputDir
+        self.text_log = ctk.CTkTextbox(
+            log_tab, corner_radius=8, border_width=0,
+            fg_color=("gray90", "gray13"),
+            font=ctk.CTkFont(family="Consolas", size=self._font_size - 2),
         )
-        self.entry_txt_dir = self._labeled_entry(
-            main_frame, "TXT 输出目录:", config.txtOutputDir
-        )
-        self.entry_cache_dir = self._labeled_entry(
-            main_frame, "缓存目录:", config.cacheOutputDir
-        )
+        self.text_log.grid(row=0, column=0, sticky="nsew", padx=15, pady=15)
+        self._register_font(self.text_log, "textbox", {"family": "Consolas", "offset": -2})
 
-        # ── 进度条 ──
-        self._section(main_frame, "进度")
+        # ========== 底部固定栏（进度条 + 按钮） ==========
+        bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
+        bottom_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=(0, 15))
+        bottom_frame.grid_columnconfigure(0, weight=1)
 
-        self.progress_bar = ctk.CTkProgressBar(main_frame)
-        self.progress_bar.pack(fill="x", pady=(4, 2))
+        # 进度卡片
+        progress_card = ctk.CTkFrame(
+            bottom_frame, corner_radius=12,
+            fg_color=(Colors.CARD_LIGHT, Colors.CARD_DARK),
+            border_width=1,
+            border_color=(Colors.CARD_BORDER_LIGHT, Colors.CARD_BORDER_DARK),
+        )
+        progress_card.pack(fill="x", pady=(0, 8))
+
+        progress_inner = ctk.CTkFrame(progress_card, fg_color="transparent")
+        progress_inner.pack(fill="both", padx=15, pady=10)
+
+        self.progress_bar = ctk.CTkProgressBar(
+            progress_inner, height=8, corner_radius=4,
+            progress_color=Colors.PRIMARY,
+        )
+        self.progress_bar.pack(fill="x", pady=(0, 8))
         self.progress_bar.set(0)
 
-        self.label_status = ctk.CTkLabel(main_frame, text="就绪", anchor="w")
-        self.label_status.pack(fill="x")
+        self.label_status = ctk.CTkLabel(
+            progress_inner, text="就绪",
+            font=self._font(-2),
+            text_color=("gray40", "gray70"),
+        )
+        self.label_status.pack(anchor="w")
+        self._register_font(self.label_status, "label", {"offset": -2})
 
-        # ── 日志区域 ──
-        self._section(main_frame, "日志")
+        # 按钮栏
+        btn_frame = ctk.CTkFrame(bottom_frame, fg_color="transparent")
+        btn_frame.pack(fill="x")
 
-        self.text_log = ctk.CTkTextbox(main_frame, height=180)
-        self.text_log.pack(fill="both", expand=True, pady=(4, 4))
-
-        # ── 按钮栏 ──
-        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        btn_frame.pack(fill="x", padx=16, pady=(0, 12))
+        btn_inner = ctk.CTkFrame(btn_frame, fg_color="transparent")
+        btn_inner.pack()
 
         self.btn_start = ctk.CTkButton(
-            btn_frame, text="开始下载", fg_color="#2ecc71", hover_color="#27ae60",
+            btn_inner, text="开始下载",
+            font=self._font(1, "bold"),
+            height=42, corner_radius=10,
+            fg_color=Colors.SUCCESS, hover_color=Colors.SUCCESS_HOVER,
             command=self._on_start,
         )
-        self.btn_start.pack(side="left", padx=(0, 8))
+        self.btn_start.pack(side="left", padx=(0, 10))
+        self._register_font(self.btn_start, "button", {"offset": 1, "weight": "bold"})
 
         self.btn_stop = ctk.CTkButton(
-            btn_frame, text="停止", fg_color="#e74c3c", hover_color="#c0392b",
+            btn_inner, text="停止",
+            font=self._font(1, "bold"),
+            height=42, corner_radius=10,
+            fg_color=Colors.DANGER, hover_color=Colors.DANGER_HOVER,
             command=self._on_stop, state="disabled",
         )
-        self.btn_stop.pack(side="left", padx=(0, 8))
+        self.btn_stop.pack(side="left", padx=(0, 10))
+        self._register_font(self.btn_stop, "button", {"offset": 1, "weight": "bold"})
 
         self.btn_clear = ctk.CTkButton(
-            btn_frame, text="清空日志", command=self._on_clear_log,
-            fg_color="transparent", border_width=1,
+            btn_inner, text="清空日志",
+            font=self._font(),
+            height=42, corner_radius=10,
+            fg_color="transparent", border_width=2, border_color="gray50",
+            text_color=("gray30", "gray80"),
+            hover_color=("gray90", "gray25"),
+            command=self._on_clear_log,
         )
         self.btn_clear.pack(side="left")
+        self._register_font(self.btn_clear, "button", {"offset": 0})
 
-    # ── UI 辅助方法 ─────────────────────────────────────────
+    # ── 卡片/控件工厂方法 ───────────────────────────────────
 
-    @staticmethod
-    def _section(parent, text: str):
-        label = ctk.CTkLabel(
-            parent, text=text,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            anchor="w",
+    def _create_card(self, parent, title: str, icon: str = "") -> ctk.CTkFrame:
+        card = ctk.CTkFrame(
+            parent, corner_radius=15,
+            fg_color=(Colors.CARD_LIGHT, Colors.CARD_DARK),
+            border_width=1,
+            border_color=(Colors.CARD_BORDER_LIGHT, Colors.CARD_BORDER_DARK),
         )
-        label.pack(fill="x", pady=(12, 2))
-        sep = ctk.CTkFrame(parent, height=1)
-        sep.pack(fill="x", pady=(0, 4))
+        card.pack(fill="x", pady=(0, 10))
 
-    @staticmethod
-    def _labeled_entry(parent, label_text: str, default: str) -> ctk.CTkEntry:
+        header = ctk.CTkFrame(card, fg_color="transparent", height=35)
+        header.pack(fill="x", padx=15, pady=(12, 0))
+        header.pack_propagate(False)
+
+        header_label = ctk.CTkLabel(
+            header,
+            text=f"{icon} {title}" if icon else title,
+            font=self._font(1, "bold"),
+            text_color=("gray20", "gray90"),
+        )
+        header_label.pack(side="left")
+        self._register_font(header_label, "label", {"offset": 1, "weight": "bold"})
+
+        content = ctk.CTkFrame(card, fg_color="transparent")
+        content.pack(fill="x", padx=15, pady=(8, 15))
+
+        return content
+
+    def _create_input_group(
+        self, parent, label: str, default: str = "",
+        placeholder: str = "", required: bool = False,
+    ) -> ctk.CTkEntry:
+        group = ctk.CTkFrame(parent, fg_color="transparent")
+        group.pack(fill="x", pady=4)
+
+        label_frame = ctk.CTkFrame(group, fg_color="transparent")
+        label_frame.pack(fill="x")
+
+        label_text = f"{label} {'*' if required else ''}"
+        lbl = ctk.CTkLabel(
+            label_frame, text=label_text,
+            font=self._font(-2),
+            text_color=("gray40", "gray70"),
+        )
+        lbl.pack(side="left")
+        self._register_font(lbl, "label", {"offset": -2})
+
+        if required:
+            req_lbl = ctk.CTkLabel(
+                label_frame, text="(必填)",
+                font=self._font(-4),
+                text_color="red",
+            )
+            req_lbl.pack(side="left", padx=(5, 0))
+            self._register_font(req_lbl, "label", {"offset": -4})
+
+        entry = ctk.CTkEntry(
+            group, placeholder_text=placeholder,
+            height=36, corner_radius=8, border_width=1,
+            fg_color=("gray97", "gray20"),
+            border_color=("gray70", "gray50"),
+            font=self._font(-2),
+        )
+        entry.pack(fill="x", pady=(4, 0))
+        entry.insert(0, default)
+        self._register_font(entry, "entry", {"offset": -2})
+
+        return entry
+
+    def _create_inline_input(
+        self, parent, label: str, default: str, row: int, col: int,
+    ) -> ctk.CTkEntry:
         frame = ctk.CTkFrame(parent, fg_color="transparent")
-        frame.pack(fill="x", pady=2)
-        ctk.CTkLabel(frame, text=label_text, width=180, anchor="w").pack(side="left")
-        entry = ctk.CTkEntry(frame)
-        entry.pack(side="left", fill="x", expand=True)
-        entry.insert(0, default)
+        frame.grid(row=row, column=col, sticky="ew", padx=(0 if col == 0 else 10, 0 if col == 1 else 10), pady=5)
+        frame.grid_columnconfigure(0, weight=1)
+
+        if label:
+            lbl = ctk.CTkLabel(
+                frame, text=label,
+                font=self._font(-2),
+                text_color=("gray40", "gray70"),
+            )
+            lbl.pack(anchor="w", pady=(0, 2))
+            self._register_font(lbl, "label", {"offset": -2})
+
+        entry = ctk.CTkEntry(
+            frame, height=34, corner_radius=8, border_width=1,
+            fg_color=("gray97", "gray20"),
+            border_color=("gray70", "gray50"),
+            font=self._font(-2),
+        )
+        entry.pack(fill="x")
+        entry.insert(0, str(default))
+        self._register_font(entry, "entry", {"offset": -2})
+
         return entry
 
-    @staticmethod
-    def _labeled_entry_inline(parent, label_text: str, default: str) -> ctk.CTkEntry:
-        ctk.CTkLabel(parent, text=label_text, anchor="w").pack(side="left", padx=(0, 4))
-        entry = ctk.CTkEntry(parent, width=80)
-        entry.pack(side="left", padx=(0, 12))
-        entry.insert(0, default)
-        return entry
+    def _create_switch(self, parent, text: str, variable, row: int, col: int):
+        frame = ctk.CTkFrame(parent, fg_color="transparent")
+        frame.grid(row=row, column=col, sticky="w", padx=(0, 20), pady=5)
+
+        sw = ctk.CTkSwitch(
+            frame, text=text, variable=variable,
+            font=self._font(-1),
+            progress_color=Colors.PRIMARY,
+        )
+        sw.pack(side="left")
+        self._register_font(sw, "switch", {"offset": -1})
+
+        return sw
+
+    # ── 字体大小滑块回调 ────────────────────────────────────
+
+    def _on_font_size_change(self, value):
+        size = int(round(value))
+        if size != self._font_size:
+            self._apply_font_size(size)
 
     # ── 配置读写 ────────────────────────────────────────────
 
-    def _load_config_to_ui(self):
-        """config.py 中的默认值已在 _build_ui 时填入"""
-        pass
-
     def _apply_ui_to_config(self) -> list[str]:
-        """将 UI 值写入 config 模块，返回错误列表"""
         errors: list[str] = []
 
         config.bookURL = self.entry_book_url.get().strip()
@@ -311,7 +555,6 @@ class NovalPieApp(ctk.CTk):
     # ── 下载逻辑（线程） ───────────────────────────────────
 
     def _run_download(self):
-        # 重定向 stdout/stderr 到日志
         old_stdout = sys.stdout
         old_stderr = sys.stderr
         handler = TextHandler(self._log)
@@ -330,7 +573,6 @@ class NovalPieApp(ctk.CTk):
             self.after(0, self._download_finished)
 
     def _do_download(self):
-        # 域名一致性检查
         parsed_base = urlparse(config.base_url)
         parsed_book = urlparse(config.bookURL)
         if parsed_base.scheme != parsed_book.scheme or parsed_base.netloc != parsed_book.netloc:
@@ -389,8 +631,6 @@ class NovalPieApp(ctk.CTk):
             print(f"[*] 作者: {meta.author}")
         print(f"[*] 待下载章节: {len(chapter_refs)}")
 
-        total = len(chapter_refs)
-
         # Monkey-patch print_progress 以更新进度条
         _orig_print_progress = utils.print_progress
         def _gui_print_progress(current: int, total: int, title: str):
@@ -402,15 +642,15 @@ class NovalPieApp(ctk.CTk):
         # Monkey-patch sleep_between 以支持停止
         _orig_sleep = utils.sleep_between
         def _checkable_sleep(min_sec: float, max_sec: float):
-            delay = max(min_sec, min(max_sec, __import__("random").uniform(min_sec, max_sec)))
-            # 分段 sleep 以便及时响应停止
+            import random, time
+            delay = max(min_sec, min(max_sec, random.uniform(min_sec, max_sec)))
             step = 0.2
             elapsed = 0.0
             while elapsed < delay:
                 if self._stop_event.is_set():
                     return
                 s = min(step, delay - elapsed)
-                __import__("time").sleep(s)
+                time.sleep(s)
                 elapsed += s
         utils.sleep_between = _checkable_sleep
 
