@@ -40,6 +40,17 @@ def read_cookie_line(path_value: str) -> str:
     except Exception:
         return ""
 
+def read_auth_token(cookie_path: str = "") -> str:
+    """读取 JWT token 文件 (novalpie.token)，返回 token 字符串"""
+    base = cookie_path or config.cookieFilePath
+    token_path = Path(base).with_suffix(".token")
+    if not token_path.exists():
+        return ""
+    try:
+        return token_path.read_text(encoding="utf-8").splitlines()[0].strip()
+    except Exception:
+        return ""
+
 def absolute_url(u: str) -> str:
     return urljoin(config.base_url.rstrip("/") + "/", u)
 

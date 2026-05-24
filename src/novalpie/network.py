@@ -12,9 +12,11 @@ try:
 except Exception:
     sync_playwright = None
 
-def make_session(cookie_line: str) -> requests.Session:
+def make_session(cookie_line: str, auth_token: str = "") -> requests.Session:
     s = requests.Session()
     s.headers.update(config.DEFAULT_HEADERS)
+    if auth_token:
+        s.headers["Authorization"] = f"Bearer {auth_token}"
     if cookie_line:
         s.headers["Cookie"] = cookie_line
         for k, v in utils.parse_cookie_line(cookie_line).items():

@@ -580,10 +580,13 @@ class NovalPieApp(ctk.CTk):
             return
 
         cookie_line = utils.read_cookie_line(config.cookieFilePath)
+        auth_token = utils.read_auth_token(config.cookieFilePath)
         if cookie_line:
             print("[*] Cookie 已加载")
-        else:
-            print("[*] 未找到 Cookie 文件，继续无 Cookie 模式")
+        if auth_token:
+            print("[*] JWT Token 已加载")
+        if not cookie_line and not auth_token:
+            print("[*] 未找到认证信息，继续无认证模式")
 
         try:
             book_id, start_chapter_id = network.parse_book_url(config.bookURL)
@@ -591,7 +594,7 @@ class NovalPieApp(ctk.CTk):
             print(f"[x] 无效的 bookURL: {e}")
             return
 
-        session = network.make_session(cookie_line)
+        session = network.make_session(cookie_line, auth_token=auth_token)
 
         chapter_cache = cache.load_chapter_cache(book_id)
         if chapter_cache:
@@ -656,7 +659,7 @@ class NovalPieApp(ctk.CTk):
 
         try:
             chapters, failed_chapters, chapter_cache = browser.download_chapters_with_browser(
-                chapter_refs, cookie_line, chapter_cache
+                chapter_refs, cookie_line, chapter_cache, auth_token=auth_token
             )
         finally:
             utils.print_progress = _orig_print_progress

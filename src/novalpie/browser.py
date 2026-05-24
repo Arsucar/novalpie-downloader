@@ -294,6 +294,7 @@ def download_chapters_with_browser(
     chapters: list[config.ChapterRef],
     cookie_line: str,
     chapter_cache: dict[int, config.ChapterData],
+    auth_token: str = "",
 ) -> tuple[list[config.ChapterData], list[config.FailedChapter], dict[int, config.ChapterData]]:
     if sync_playwright is None:
         raise RuntimeError("playwright is not installed")
@@ -303,8 +304,19 @@ def download_chapters_with_browser(
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=config.headless)
         context = browser.new_context(user_agent=config.DEFAULT_HEADERS["User-Agent"], locale="zh-CN")
+        extra_headers: dict[str, str] = {}
         if cookie_line:
-            context.set_extra_http_headers({"Cookie": cookie_line})
+            extra_headers["Cookie"] = cookie_line
+        if auth_token:
+            extra_headers["Authorization"] = f"Bearer {auth_token}"
+        if extra_headers:
+            context.set_extra_http_headers(extra_headers)
+        # 如果有 JWT token，注入到 localStorage
+        if auth_token:
+            page_init = context.new_page()
+            page_init.goto(config.base_url, wait_until="domcontentloaded", timeout=config.pageGotoTimeoutMs)
+            page_init.evaluate("([k, v]) => localStorage.setItem(k, v)", ["auth_token", auth_token])
+            page_init.close()
         page = context.new_page()
 
         total = len(chapters)
