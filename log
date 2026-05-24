@@ -1,0 +1,791 @@
+[*] 未找到 Cookie 文件，继续无 Cookie 模式
+[*] book_id=1535, start_chapter_id=352729
+[*] 正在获取章节列表...
+[*] 章节列表来源: API, 数量=499
+[*] 书名: 成为了异世界的服装设计师
+[*] 作者: 녹차맛민트라떼
+[*] 待下载章节: 499
+[1/499] Fetching https://novalpie.cc/book/1535/352729
+  [+] ok: 序章 (309 chars, images=1
+[2/499] Fetching https://novalpie.cc/book/1535/352730
+  [+] ok: 001 - 平淡日常中突如其来的恶意中伤 (3579 chars, images=1
+[3/499] Fetching https://novalpie.cc/book/1535/352731
+  [+] ok: 002 - 漂亮又善良的潮水 (1) (3508 chars, images=0
+[4/499] Fetching https://novalpie.cc/book/1535/352732
+  [+] ok: 003 - 예쁘고 마음씨 착한 조수 (2) (3036 chars, images=0
+[5/499] Fetching https://novalpie.cc/book/1535/352733
+  [+] ok: 004 - 漂亮又善良的潮水 (3) (3055 chars, images=0
+[6/499] Fetching https://novalpie.cc/book/1535/352734
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 005 - 母亲 (1) (2833 chars, images=0
+[7/499] Fetching https://novalpie.cc/book/1535/352735
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 006 - 母亲 (2) (3275 chars, images=0
+[8/499] Fetching https://novalpie.cc/book/1535/352736
+  [+] ok: 007 - 母亲下达的两项任务 (1) (3027 chars, images=0
+[9/499] Fetching https://novalpie.cc/book/1535/352737
+  [+] ok: 008 - 母亲赐予我的两项任务 (2) (3258 chars, images=0
+[10/499] Fetching https://novalpie.cc/book/1535/352738
+  [+] ok: 009 - 제작은 하청에게 (2668 chars, images=0
+[11/499] Fetching https://novalpie.cc/book/1535/352739
+  [+] ok: 010 - 反应不错，但并非我本意 (3097 chars, images=0
+[12/499] Fetching https://novalpie.cc/book/1535/352740
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 011 - 여동생 연애 사업 도와주기 (1) (2948 chars, images=0
+[13/499] Fetching https://novalpie.cc/book/1535/352741
+  [+] ok: 012 - 帮助妹妹恋爱事业（2） (2943 chars, images=0
+[14/499] Fetching https://novalpie.cc/book/1535/352742
+  [+] ok: 013 - 妹妹恋爱事业也？帮忙（3） (3121 chars, images=0
+[15/499] Fetching https://novalpie.cc/book/1535/352743
+  [+] ok: 014 - 帮妹妹经营恋爱事业 (4) (3049 chars, images=0
+[16/499] Fetching https://novalpie.cc/book/1535/352744
+  [+] ok: 015 - 帮妹妹恋爱事业（5） (3428 chars, images=0
+[17/499] Fetching https://novalpie.cc/book/1535/352745
+  [+] ok: 016 - 끝을 보이는 여동생의 연애 사업 (3434 chars, images=0
+[18/499] Fetching https://novalpie.cc/book/1535/352746
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 017 - 끝을 보이는 여동생의 연애 사업 (2) (2917 chars, images=0
+[19/499] Fetching https://novalpie.cc/book/1535/352747
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 018 - 都快夏天了还冷吗？ (2901 chars, images=0
+[20/499] Fetching https://novalpie.cc/book/1535/352748
+  [+] ok: 019 - 都快夏天了还冷？（2） (2803 chars, images=0
+[21/499] Fetching https://novalpie.cc/book/1535/352749
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 020 - 都快夏天了还说冷？（3） (2937 chars, images=0
+[22/499] Fetching https://novalpie.cc/book/1535/352750
+  [+] ok: 021 - 新面孔登场 (1) (2851 chars, images=0
+[23/499] Fetching https://novalpie.cc/book/1535/352751
+  [+] ok: 022 - 新面孔登场(2) (3355 chars, images=0
+[24/499] Fetching https://novalpie.cc/book/1535/352752
+  [+] ok: 023 - 뉴페이스 등장 (3) (2836 chars, images=0
+[25/499] Fetching https://novalpie.cc/book/1535/352753
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 024 - 新面孔登场 (4) (3099 chars, images=0
+[26/499] Fetching https://novalpie.cc/book/1535/352754
+  [+] ok: 025 - 市场调查 (1) (2881 chars, images=0
+[27/499] Fetching https://novalpie.cc/book/1535/352755
+  [+] ok: 026 - 시장조사 (2) (3138 chars, images=0
+[28/499] Fetching https://novalpie.cc/book/1535/352756
+  [+] ok: 027 - 市场调查（3） (3021 chars, images=0
+[29/499] Fetching https://novalpie.cc/book/1535/352757
+  [+] ok: 028 - 市场调查 (4) (2810 chars, images=0
+[30/499] Fetching https://novalpie.cc/book/1535/352758
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 029 - 죄송하지만 지금 입고 있는 속옷이 무엇인지 알 수 있습니까? (1) (2907 chars, images=0
+[31/499] Fetching https://novalpie.cc/book/1535/352759
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 030 - 抱歉，您现在穿的内衣是什么可以知道吗？(2) (3234 chars, images=0
+[32/499] Fetching https://novalpie.cc/book/1535/352760
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 031 - 不好意思，请问您现在穿的内衣是什么？(3) (3225 chars, images=0
+[33/499] Fetching https://novalpie.cc/book/1535/352761
+  [+] ok: 032 - 你擅长骑马吗？ (3512 chars, images=0
+[34/499] Fetching https://novalpie.cc/book/1535/352762
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 033 - 犹豫不决所以两个都做了 (1) (2869 chars, images=0
+[35/499] Fetching https://novalpie.cc/book/1535/352763
+  [+] ok: 034 - 因为犹豫不决所以两个都做了 (2) (3023 chars, images=0
+[36/499] Fetching https://novalpie.cc/book/1535/352764
+  [+] ok: 035 - 纠结之下两个都做了 (3) (2981 chars, images=0
+[37/499] Fetching https://novalpie.cc/book/1535/352765
+  [+] ok: 036 - 需要暂时躲藏的地方 (1) (2833 chars, images=0
+[38/499] Fetching https://novalpie.cc/book/1535/352766
+  [+] ok: 037 - 딱히 숨을 장소가 필요가 없다는 걸 깨달았다 (2949 chars, images=0
+[39/499] Fetching https://novalpie.cc/book/1535/352767
+  [!] attempt 1 failed: current chapter title not found in page text
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 038 - 先努力跑腿（1） (3328 chars, images=0
+[40/499] Fetching https://novalpie.cc/book/1535/352768
+  [+] ok: 039 - 일단 열심히 발품 팔기 (2) (3159 chars, images=0
+[41/499] Fetching https://novalpie.cc/book/1535/352769
+  [!] attempt 1 failed: current chapter title not found in page text
+  [!] attempt 2 failed: current chapter title not found in page text
+  [!] attempt 3 failed: current chapter title not found in page text
+  [+] ok: 040 - 일단 열심히 발품 팔기 (3) (3121 chars, images=0
+[42/499] Fetching https://novalpie.cc/book/1535/352770
+  [+] ok: 041 - 只有做好觉悟的家伙才能进来 (1) (2995 chars, images=0
+[43/499] Fetching https://novalpie.cc/book/1535/352771
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 042 - 각오가 된 놈들만 들어와 (2) (2749 chars, images=0
+[44/499] Fetching https://novalpie.cc/book/1535/352772
+  [!] attempt 1 failed: current chapter title not found in page text
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 043 - 只有做好觉悟的家伙才能进来...? (3) (2759 chars, images=0
+[45/499] Fetching https://novalpie.cc/book/1535/352773
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 044 - 각오가 된 놈들만 들어와... (4) (3039 chars, images=0
+[46/499] Fetching https://novalpie.cc/book/1535/352774
+  [!] attempt 1 failed: current chapter title not found in page text
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 045 - 攒起来一看是毁灭性组合 (1) (2848 chars, images=0
+[47/499] Fetching https://novalpie.cc/book/1535/352775
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 046 - 收集一看竟是毁灭性组合 (2) (2986 chars, images=0
+[48/499] Fetching https://novalpie.cc/book/1535/352776
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [+] ok: 047 - 收集起来一看是毁灭性组合 (3) (2973 chars, images=0
+[49/499] Fetching https://novalpie.cc/book/1535/352777
+  [!] attempt 1 failed: current chapter title not found in page text
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 048 - 第一天上班 (2910 chars, images=0
+[50/499] Fetching https://novalpie.cc/book/1535/352778
+  [+] ok: 049 - 员工们工作太努力了 (1) (2976 chars, images=0
+[51/499] Fetching https://novalpie.cc/book/1535/352779
+  [+] ok: 050 - 员工们工作太努力了 (2) (3247 chars, images=0
+[52/499] Fetching https://novalpie.cc/book/1535/352780
+  [+] ok: 051 - 员工们工作太努力了 (3) (2807 chars, images=0
+[53/499] Fetching https://novalpie.cc/book/1535/352781
+  [+] ok: 052 - (外传) 可疑的说明会 (4079 chars, images=4
+[54/499] Fetching https://novalpie.cc/book/1535/352782
+  [+] ok: 053 - 应该还不至于那样吧... (1) (2958 chars, images=1
+[55/499] Fetching https://novalpie.cc/book/1535/352783
+  [+] ok: 054 - 好像不是那样的程度... (2) (2979 chars, images=0
+[56/499] Fetching https://novalpie.cc/book/1535/352784
+  [+] ok: 055 - 感觉还没到那种程度... (3) (2784 chars, images=0
+[57/499] Fetching https://novalpie.cc/book/1535/352785
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 056 - 일이 착실하게 준비될 때만큼 기분 좋은 일이 없다 (1) (2997 chars, images=0
+[58/499] Fetching https://novalpie.cc/book/1535/352786
+  [!] attempt 1 failed: current chapter title not found in page text
+  [!] attempt 2 failed: current chapter title not found in page text
+  [!] attempt 3 failed: current chapter title not found in page text
+  [+] ok: 057 - 没有什么比事情准备得井井有条更让人心情愉悦了 (2) (2955 chars, images=0
+[59/499] Fetching https://novalpie.cc/book/1535/352787
+  [+] ok: 058 - 先完成一件大事 (3204 chars, images=0
+[60/499] Fetching https://novalpie.cc/book/1535/352788
+  [+] ok: 059 - 빨리빨리 (1) (2936 chars, images=0
+[61/499] Fetching https://novalpie.cc/book/1535/352789
+  [+] ok: 060 - 빨리빨리 (2) (3016 chars, images=0
+[62/499] Fetching https://novalpie.cc/book/1535/352790
+  [+] ok: 061 - 快快快 (3) (2862 chars, images=0
+[63/499] Fetching https://novalpie.cc/book/1535/352791
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 062 - 빨리빨리 (4) (2814 chars, images=0
+[64/499] Fetching https://novalpie.cc/book/1535/352792
+  [+] ok: 063 - 快快 (5) (2894 chars, images=0
+[65/499] Fetching https://novalpie.cc/book/1535/352793
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 064 - 精灵待在树上不是常识吗？ (3446 chars, images=0
+[66/499] Fetching https://novalpie.cc/book/1535/352794
+  [+] ok: 065 - 엘프는 나무 위에 있는 게 상식 아니야? (2) (3168 chars, images=0
+[67/499] Fetching https://novalpie.cc/book/1535/352795
+  [+] ok: 暴风雨前夕 (2969 chars, images=0
+[68/499] Fetching https://novalpie.cc/book/1535/352796
+  [+] ok: 067 - 暴风雨前夕 (2) (2969 chars, images=1
+[69/499] Fetching https://novalpie.cc/book/1535/352797
+  [+] ok: 068 - 快点把衣服卖了吧！(1) (3687 chars, images=0
+[70/499] Fetching https://novalpie.cc/book/1535/352798
+  [+] ok: 069 - 外传，员工咨询记录 (3044 chars, images=0
+[71/499] Fetching https://novalpie.cc/book/1535/352799
+  [+] ok: 070 - 快点把衣服卖了吧！(2) (3719 chars, images=0
+[72/499] Fetching https://novalpie.cc/book/1535/352800
+  [+] ok: 071 - 是不是太无聊了？ (1) (3200 chars, images=0
+[73/499] Fetching https://novalpie.cc/book/1535/352801
+  [+] ok: 072 - 是不是太无聊了？(2) (3045 chars, images=1
+[74/499] Fetching https://novalpie.cc/book/1535/352802
+  [+] ok: 073 - 不会太无聊吗？（3） (3652 chars, images=0
+[75/499] Fetching https://novalpie.cc/book/1535/352803
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 074 - 不会太无聊吗？ (4) (3221 chars, images=0
+[76/499] Fetching https://novalpie.cc/book/1535/352804
+  [+] ok: 075 - 台风眼 (1) (3263 chars, images=1
+[77/499] Fetching https://novalpie.cc/book/1535/352805
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 076 - 台风眼 (2) (3140 chars, images=0
+[78/499] Fetching https://novalpie.cc/book/1535/352806
+  [+] ok: 077 - 태풍의 눈 (3) (3122 chars, images=0
+[79/499] Fetching https://novalpie.cc/book/1535/352807
+  [+] ok: 078 - 태풍의 눈 (5) (2697 chars, images=0
+[80/499] Fetching https://novalpie.cc/book/1535/352808
+  [+] ok: 079 - 飞蛾扑火 (1) (2929 chars, images=0
+[81/499] Fetching https://novalpie.cc/book/1535/352809
+  [+] ok: 080 - 扑火飞蛾 (2) (3425 chars, images=0
+[82/499] Fetching https://novalpie.cc/book/1535/352810
+  [+] ok: 081 - 周刊专栏 (1) (2881 chars, images=1
+[83/499] Fetching https://novalpie.cc/book/1535/352811
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 082 - 每周内衣（2） (3140 chars, images=0
+[84/499] Fetching https://novalpie.cc/book/1535/352812
+  [+] ok: 083 - 每周内衣（3） (4020 chars, images=1
+[85/499] Fetching https://novalpie.cc/book/1535/352813
+  [+] ok: 084 - 주간 란제리 (4) (3270 chars, images=0
+[86/499] Fetching https://novalpie.cc/book/1535/352814
+  [+] ok: 085 - 주간 란제리 (5) (3678 chars, images=0
+[87/499] Fetching https://novalpie.cc/book/1535/352815
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 086 - 每周内衣（6） (3197 chars, images=0
+[88/499] Fetching https://novalpie.cc/book/1535/352816
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 087 - 哎呀，怎么会有这种巧合 (1) (3408 chars, images=0
+[89/499] Fetching https://novalpie.cc/book/1535/352817
+  [+] ok: 088 - 어머나, 이런 우연이 있을 수가 (2) (4641 chars, images=0
+[90/499] Fetching https://novalpie.cc/book/1535/352818
+  [+] ok: 089 - 事已至此只能接受了吧还能怎么办呢 (1) (3337 chars, images=0
+[91/499] Fetching https://novalpie.cc/book/1535/352819
+  [+] ok: 090 - 事已至此只能接受了 还能怎么办呢 (2) (3193 chars, images=0
+[92/499] Fetching https://novalpie.cc/book/1535/352820
+  [+] ok: 091 - 看不到我们孩子死去的样子 (1) (3591 chars, images=0
+[93/499] Fetching https://novalpie.cc/book/1535/352821
+  [+] ok: 092 - 而且我们看不到孩子哭泣的样子 (2) (3810 chars, images=0
+[94/499] Fetching https://novalpie.cc/book/1535/352822
+  [+] ok: 093 - 而且我不能看着我们的孩子垂头丧气的样子 (3) (3176 chars, images=0
+[95/499] Fetching https://novalpie.cc/book/1535/352823
+  [+] ok: 094 - 而且我无法看到我们孩子沮丧的样子 (4) (3581 chars, images=0
+[96/499] Fetching https://novalpie.cc/book/1535/352824
+  [+] ok: 095 - 要小心的事情太多 (3641 chars, images=0
+[97/499] Fetching https://novalpie.cc/book/1535/352825
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 096 - 前夕祭 (1) (3817 chars, images=1
+[98/499] Fetching https://novalpie.cc/book/1535/352826
+  [+] ok: 097 - 前夜祭 (2) (3544 chars, images=0
+[99/499] Fetching https://novalpie.cc/book/1535/352827
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 098 - 전야제 (3) (3696 chars, images=0
+[100/499] Fetching https://novalpie.cc/book/1535/352828
+  [+] ok: 099 - 전야제 (4) (3142 chars, images=1
+[101/499] Fetching https://novalpie.cc/book/1535/352829
+  [+] ok: 100 - 前夕祭 (5) (3719 chars, images=0
+[102/499] Fetching https://novalpie.cc/book/1535/352830
+  [+] ok: 101 - 前夜祭 (6) (4601 chars, images=0
+[103/499] Fetching https://novalpie.cc/book/1535/352831
+  [+] ok: 102 - 전야제의 뒤편 (3019 chars, images=0
+[104/499] Fetching https://novalpie.cc/book/1535/352832
+  [+] ok: 103 - 邪恶大人们的时间 (3193 chars, images=0
+[105/499] Fetching https://novalpie.cc/book/1535/352833
+  [+] ok: 104 - 鲸鱼之间的虾 (2875 chars, images=0
+[106/499] Fetching https://novalpie.cc/book/1535/352834
+  [+] ok: 105 - 时间与精神的房间（1） (3461 chars, images=0
+[107/499] Fetching https://novalpie.cc/book/1535/352835
+  [+] ok: 106 - 시간과 정신의 방 (2) (3154 chars, images=0
+[108/499] Fetching https://novalpie.cc/book/1535/352836
+  [+] ok: 107 - 时间与精神的房间（3） (3364 chars, images=0
+[109/499] Fetching https://novalpie.cc/book/1535/352837
+  [+] ok: 108 - 不在身边却无比思念的一个人 (3741 chars, images=0
+[110/499] Fetching https://novalpie.cc/book/1535/352838
+  [+] ok: 109 - 现在贵族们的水平... (2675 chars, images=0
+[111/499] Fetching https://novalpie.cc/book/1535/352839
+  [+] ok: 110 - 接力传递 (3539 chars, images=0
+[112/499] Fetching https://novalpie.cc/book/1535/352840
+  [+] ok: 111 - 一出狱就上班的疯子 (1) (3769 chars, images=0
+[113/499] Fetching https://novalpie.cc/book/1535/352841
+  [+] ok: 112 - 一出狱就上班的疯子 (2) (3241 chars, images=1
+[114/499] Fetching https://novalpie.cc/book/1535/352842
+  [+] ok: 113 - 一释放就上班的疯子（3） (3254 chars, images=1
+[115/499] Fetching https://novalpie.cc/book/1535/352843
+  [+] ok: 114 - 是前还是后，这是个问题 (1) (3185 chars, images=0
+[116/499] Fetching https://novalpie.cc/book/1535/352844
+  [+] ok: 115 - 앞이냐 뒤냐 그것이 문제로다 (2) (2864 chars, images=0
+[117/499] Fetching https://novalpie.cc/book/1535/352845
+  [+] ok: 116 - 앞이냐 뒤냐 그것이 문제로다 (3) (2929 chars, images=0
+[118/499] Fetching https://novalpie.cc/book/1535/352846
+  [+] ok: 117 - 非常微小的雪球 (3599 chars, images=0
+[119/499] Fetching https://novalpie.cc/book/1535/352847
+  [+] ok: 118 - 幕间，员工咨询记录（2） (4036 chars, images=0
+[120/499] Fetching https://novalpie.cc/book/1535/352848
+  [+] ok: 119 - 可疑的委托 (1) (3240 chars, images=0
+[121/499] Fetching https://novalpie.cc/book/1535/352849
+  [+] ok: 120 - 수상한 의뢰 (2) (3600 chars, images=0
+[122/499] Fetching https://novalpie.cc/book/1535/352850
+  [+] ok: 121 - 可疑的委托（3） (3222 chars, images=0
+[123/499] Fetching https://novalpie.cc/book/1535/352851
+  [+] ok: 122 - 可疑的委托（4） (3511 chars, images=0
+[124/499] Fetching https://novalpie.cc/book/1535/352852
+  [+] ok: 123 - 积极业务拓展与挑衅仅一线之隔 (1) (2781 chars, images=0
+[125/499] Fetching https://novalpie.cc/book/1535/352853
+  [+] ok: 124 - 积极的业务拓展与挑衅仅一线之隔 (2) (4169 chars, images=1
+[126/499] Fetching https://novalpie.cc/book/1535/352854
+  [+] ok: 125 - 일단은 생존한 것 같은데...? (3680 chars, images=0
+[127/499] Fetching https://novalpie.cc/book/1535/352855
+  [+] ok: 126 - 现在我在看什么呢？ (1) (4032 chars, images=0
+[128/499] Fetching https://novalpie.cc/book/1535/352856
+  [+] ok: 127 - 我现在在遭受什么？ (2) (3477 chars, images=0
+[129/499] Fetching https://novalpie.cc/book/1535/352857
+  [+] ok: 128 - 被皇帝看中的意义 (1) (3458 chars, images=0
+[130/499] Fetching https://novalpie.cc/book/1535/352858
+  [+] ok: 129 - 被皇帝看中的意义 (2) (3371 chars, images=0
+[131/499] Fetching https://novalpie.cc/book/1535/352859
+  [+] ok: 130 - 长期计划与临时措施 (2987 chars, images=0
+[132/499] Fetching https://novalpie.cc/book/1535/352860
+  [+] ok: 131 - 事与愿违 (2844 chars, images=0
+[133/499] Fetching https://novalpie.cc/book/1535/352861
+  [+] ok: 132 - 感觉和以前有点不一样了 (1) (3139 chars, images=0
+[134/499] Fetching https://novalpie.cc/book/1535/352862
+  [+] ok: 133 - 感觉和以前有点不一样了 (2) (2670 chars, images=0
+[135/499] Fetching https://novalpie.cc/book/1535/352863
+  [+] ok: 134 - 找回初心 (1) (3897 chars, images=0
+[136/499] Fetching https://novalpie.cc/book/1535/352864
+  [+] ok: 135 - 초심찾기 (2) (2992 chars, images=0
+[137/499] Fetching https://novalpie.cc/book/1535/352865
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [!] attempt 2 failed: chapter text not ready before timeout
+  [!] attempt 3 failed: chapter text not ready before timeout
+  [+] ok: 136 - 외전. 이번에는 속일 생각이 없는 설명회 (3471 chars, images=2
+[138/499] Fetching https://novalpie.cc/book/1535/352866
+  [+] ok: 137 - 他人看待变化的眼光 (3488 chars, images=0
+[139/499] Fetching https://novalpie.cc/book/1535/352867
+  [+] ok: 138 - 好感作（1） (3201 chars, images=0
+[140/499] Fetching https://novalpie.cc/book/1535/352868
+  [+] ok: 139 - 好感度 (2) (3067 chars, images=0
+[141/499] Fetching https://novalpie.cc/book/1535/352869
+  [+] ok: 140 - 사람이 망가지기 딱 좋은 환경 (1) (3160 chars, images=0
+[142/499] Fetching https://novalpie.cc/book/1535/352870
+  [+] ok: 141 - 人容易堕落的环境 (2) (3131 chars, images=0
+[143/499] Fetching https://novalpie.cc/book/1535/352871
+  [+] ok: 142 - 异常者身边聚集着异常者们 (1) (2627 chars, images=0
+[144/499] Fetching https://novalpie.cc/book/1535/352872
+  [+] ok: 143 - 异常者身边聚集着异常者们 (2) (3010 chars, images=0
+[145/499] Fetching https://novalpie.cc/book/1535/352873
+  [+] ok: 144 - 비정상의 곁에는 비정상들이 모인다 (3) (3371 chars, images=0
+[146/499] Fetching https://novalpie.cc/book/1535/352874
+  [+] ok: 145 - 但乖巧的孩子也未必就是正常人 (1) (2881 chars, images=0
+[147/499] Fetching https://novalpie.cc/book/1535/352875
+  [+] ok: 146 - 但也不能说乖巧的孩子就一定是正常的 (2) (3103 chars, images=0
+[148/499] Fetching https://novalpie.cc/book/1535/352876
+  [+] ok: 147 - 领带 (1) (2790 chars, images=0
+[149/499] Fetching https://novalpie.cc/book/1535/389603
+  [+] ok: 148 - 领带 (2) (2974 chars, images=0
+[150/499] Fetching https://novalpie.cc/book/1535/389609
+  [+] ok: 149 - 넥타이 (3) (3335 chars, images=0
+[151/499] Fetching https://novalpie.cc/book/1535/389587
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 150 - 领带 (4) (2854 chars, images=0
+[152/499] Fetching https://novalpie.cc/book/1535/389568
+  [+] ok: 151 - 年末 (1) (3034 chars, images=0
+[153/499] Fetching https://novalpie.cc/book/1535/390476
+  [+] ok: 152 - 年末 (2) (3037 chars, images=0
+[154/499] Fetching https://novalpie.cc/book/1535/390455
+  [+] ok: 153 - 年末 (3) (3082 chars, images=2
+[155/499] Fetching https://novalpie.cc/book/1535/390755
+  [+] ok: 154 - 年末 (4) (2904 chars, images=0
+[156/499] Fetching https://novalpie.cc/book/1535/391177
+  [+] ok: 155 - 年末 (5) (4164 chars, images=0
+[157/499] Fetching https://novalpie.cc/book/1535/391401
+  [+] ok: 156 - 연말 (6) (3173 chars, images=0
+[158/499] Fetching https://novalpie.cc/book/1535/391623
+  [+] ok: 157 - 年末 (7) (3473 chars, images=0
+[159/499] Fetching https://novalpie.cc/book/1535/391858
+  [+] ok: 158 - 圣祝日 (1) (3028 chars, images=1
+[160/499] Fetching https://novalpie.cc/book/1535/392079
+  [+] ok: 159 - 圣祝日 (2) (2960 chars, images=0
+[161/499] Fetching https://novalpie.cc/book/1535/392302
+  [+] ok: 160 - 圣祝日 (3) (3202 chars, images=0
+[162/499] Fetching https://novalpie.cc/book/1535/392491
+  [+] ok: 161 - 圣祝日 (4) (3447 chars, images=0
+[163/499] Fetching https://novalpie.cc/book/1535/392717
+  [+] ok: 162 - 圣祝日 (5) (3570 chars, images=1
+[164/499] Fetching https://novalpie.cc/book/1535/392938
+  [+] ok: 163 - 성축일 (6) (3109 chars, images=0
+[165/499] Fetching https://novalpie.cc/book/1535/393390
+  [+] ok: 164 - 圣祝日 (7) (3013 chars, images=0
+[166/499] Fetching https://novalpie.cc/book/1535/393619
+  [+] ok: 165 - 새해 (1) (2890 chars, images=0
+[167/499] Fetching https://novalpie.cc/book/1535/393826
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 166 - 新年 (2) (2958 chars, images=0
+[168/499] Fetching https://novalpie.cc/book/1535/394040
+  [+] ok: 167 - 新年...? (3) (2891 chars, images=0
+[169/499] Fetching https://novalpie.cc/book/1535/394251
+  [+] ok: 168 - 新年与消灾解难不可分割的关系 (1) (3971 chars, images=0
+[170/499] Fetching https://novalpie.cc/book/1535/394486
+  [+] ok: 169 - 새해와 액땜은 떨어질 수 없는 관계 (2) (3758 chars, images=0
+[171/499] Fetching https://novalpie.cc/book/1535/394743
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 170 - 新年与消灾解难密不可分的关系 (3) (3215 chars, images=0
+[172/499] Fetching https://novalpie.cc/book/1535/394924
+  [+] ok: 171 - 新年与消灾是密不可分的关系 (4) (3292 chars, images=0
+[173/499] Fetching https://novalpie.cc/book/1535/395146
+  [+] ok: 172 - 新年与消灾解难密不可分的关系 (5) (3537 chars, images=0
+[174/499] Fetching https://novalpie.cc/book/1535/395349
+  [+] ok: 173 - 新年与驱邪密不可分的关系 (6) (3036 chars, images=0
+[175/499] Fetching https://novalpie.cc/book/1535/395749
+  [+] ok: 174 - 礼物与意义 (1) (2995 chars, images=0
+[176/499] Fetching https://novalpie.cc/book/1535/395952
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 175 - 선물과 의미 (2) (2845 chars, images=0
+[177/499] Fetching https://novalpie.cc/book/1535/396342
+  [+] ok: 176 - 선물과 의미 (3) (2853 chars, images=0
+[178/499] Fetching https://novalpie.cc/book/1535/396391
+  [+] ok: 177 - 礼物的意义 (4) (3500 chars, images=0
+[179/499] Fetching https://novalpie.cc/book/1535/396614
+  [+] ok: 178 - 沉迷于艺术灵魂的话，通常会变成普通潮人（1） (2650 chars, images=0
+[180/499] Fetching https://novalpie.cc/book/1535/396822
+  [+] ok: 179 - 沉迷于艺术灵魂的人通常会成为普通嬉皮士（2） (3005 chars, images=0
+[181/499] Fetching https://novalpie.cc/book/1535/397000
+  [+] ok: 180 - 沉迷于艺术灵魂通常会变成普通嬉皮士（3） (2809 chars, images=1
+[182/499] Fetching https://novalpie.cc/book/1535/5661019
+  [+] ok: 181 - 沉迷于艺术灵魂的话，通常会变成普通嬉皮士（4） (3465 chars, images=0
+[183/499] Fetching https://novalpie.cc/book/1535/5661091
+  [+] ok: 182 - 沉迷于艺术灵魂的话，通常会变成普通嬉皮士（5） (3518 chars, images=0
+[184/499] Fetching https://novalpie.cc/book/1535/5661027
+  [+] ok: 183 - 모로 가도 서울만 가면 그만 (1) (3605 chars, images=0
+[185/499] Fetching https://novalpie.cc/book/1535/5661034
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [+] ok: 184 - 条条大路通首尔 (2) (3072 chars, images=0
+[186/499] Fetching https://novalpie.cc/book/1535/5661040
+  [+] ok: 185 - 모로 가도 서울만 가면 그만 (3) (2926 chars, images=0
+[187/499] Fetching https://novalpie.cc/book/1535/5661095
+  [+] ok: 186 - 条条大路通首尔 (4) (3038 chars, images=0
+[188/499] Fetching https://novalpie.cc/book/1535/5661045
+  [+] ok: 187 - 无论绕路只要到首尔就行 (5) (3109 chars, images=0
+[189/499] Fetching https://novalpie.cc/book/1535/5661047
+  [+] ok: 188 - 主教和精灵朋友们留下的麻烦 (1) (3071 chars, images=0
+[190/499] Fetching https://novalpie.cc/book/1535/5661049
+  [+] ok: 189 - 알고 보니 내가 불러온 재앙 (1) (3183 chars, images=0
+[191/499] Fetching https://novalpie.cc/book/1535/5661052
+  [+] ok: 190 - 原来是我召唤的灾难 (2) (3280 chars, images=0
+[192/499] Fetching https://novalpie.cc/book/1535/5661054
+  [+] ok: 191 - 原来是我招来的灾祸 (3) (3278 chars, images=0
+[193/499] Fetching https://novalpie.cc/book/1535/5661057
+  [+] ok: 192 - 原来我才是召唤的灾祸 (4) (3370 chars, images=0
+[194/499] Fetching https://novalpie.cc/book/1535/5661060
+  [+] ok: 193 - 一触即发...？ (2825 chars, images=0
+[195/499] Fetching https://novalpie.cc/book/1535/5661063
+  [+] ok: 194 - 对于哥哥来说妹妹是怎样的存在 (1) (3208 chars, images=0
+[196/499] Fetching https://novalpie.cc/book/1535/5661066
+  [+] ok: 195 - 오빠라는 존재에게 여동생이란 (2) (3320 chars, images=0
+[197/499] Fetching https://novalpie.cc/book/1535/5661069
+  [+] ok: 196 - 对哥哥来说妹妹是怎样的存在 (3) (3129 chars, images=0
+[198/499] Fetching https://novalpie.cc/book/1535/5661102
+  [+] ok: 197 - 오빠라는 존재에게 여동생이란 (4) (3695 chars, images=0
+[199/499] Fetching https://novalpie.cc/book/1535/5661106
+  [+] ok: 198 - 오빠라는 존재에게 여동생이란 (5) (3207 chars, images=0
+[200/499] Fetching https://novalpie.cc/book/1535/5661074
+  [+] ok: 199 - 外传 (3950 chars, images=0
+[201/499] Fetching https://novalpie.cc/book/1535/5661076
+  [+] ok: 200 - 政经勾结，真是个亲切的词啊 (1) (3101 chars, images=0
+[202/499] Fetching https://novalpie.cc/book/1535/5661079
+  [+] ok: 201 - 政经勾结，真是个亲切的词啊 (2) (3206 chars, images=0
+[203/499] Fetching https://novalpie.cc/book/1535/5661082
+  [+] ok: 202 - 政经勾结，真是个亲切的词啊 (3) (3000 chars, images=0
+[204/499] Fetching https://novalpie.cc/book/1535/5661087
+  [+] ok: 203 - 政经勾结，真是个亲切的词啊 (4) (3179 chars, images=0
+[205/499] Fetching https://novalpie.cc/book/1535/5661097
+  [+] ok: 204 - 政经勾结，真是个亲切的词啊（5） (2865 chars, images=0
+[206/499] Fetching https://novalpie.cc/book/1535/5661280
+  [+] ok: 205 - 帝国第四珍贵之人想要的东西 (1) (2925 chars, images=0
+[207/499] Fetching https://novalpie.cc/book/1535/5661105
+  [+] ok: 206 - 제국에서 네 번째로 고귀한 사람이 가지고 싶은 것 (2) (2871 chars, images=0
+[208/499] Fetching https://novalpie.cc/book/1535/5661110
+  [+] ok: 207 - 帝国第四珍贵之人想要的东西 (3) (3005 chars, images=0
+[209/499] Fetching https://novalpie.cc/book/1535/5661114
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 208 - 帝国第四珍贵的人...? (1) (2900 chars, images=0
+[210/499] Fetching https://novalpie.cc/book/1535/5661119
+  [+] ok: 209 - 비상! (1) (3240 chars, images=0
+[211/499] Fetching https://novalpie.cc/book/1535/5661122
+  [+] ok: 210 - 紧急情况! (2) (3148 chars, images=0
+[212/499] Fetching https://novalpie.cc/book/1535/5661125
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 211 - 非议...？ (3) (3666 chars, images=0
+[213/499] Fetching https://novalpie.cc/book/1535/5661129
+  [+] ok: 212 - 非正式...？ (4) (3514 chars, images=0
+[214/499] Fetching https://novalpie.cc/book/1535/5661133
+  [+] ok: 213 - 紧急...! (5) (2998 chars, images=1
+[215/499] Fetching https://novalpie.cc/book/1535/5661136
+  [+] ok: 214 - 现在也开始慢慢享受这种状况了 (3798 chars, images=0
+[216/499] Fetching https://novalpie.cc/book/1535/5661138
+  [+] ok: 215 - 어린이보다 더 좋은 건 더 활기찬 어린이 (1) (3006 chars, images=0
+[217/499] Fetching https://novalpie.cc/book/1535/5661141
+  [+] ok: 216 - 어린이보다 더 좋은 건 더 활기찬 어린이 (2) (3129 chars, images=0
+[218/499] Fetching https://novalpie.cc/book/1535/5661144
+  [+] ok: 217 - 比孩子更好的是更有活力的孩子 (3) (2834 chars, images=0
+[219/499] Fetching https://novalpie.cc/book/1535/5661288
+  [+] ok: 218 - 您又不是小孩子了，为什么还总是这样呢？ (1) (2973 chars, images=0
+[220/499] Fetching https://novalpie.cc/book/1535/5661147
+  [+] ok: 219 - 又不是小孩子了，为什么还总是这样？(2) (3322 chars, images=0
+[221/499] Fetching https://novalpie.cc/book/1535/5661150
+  [+] ok: 220 - 小小的礼物（不是） (2793 chars, images=0
+[222/499] Fetching https://novalpie.cc/book/1535/5661152
+  [+] ok: 221 - 意外地，表面功夫是重大事项 (1) (3066 chars, images=0
+[223/499] Fetching https://novalpie.cc/book/1535/5661156
+  [+] ok: 222 - 外表光鲜意外地是重大事项 (2) (3308 chars, images=0
+[224/499] Fetching https://novalpie.cc/book/1535/5661188
+  [+] ok: 223 - 外表意外地是重大事项 (3) (3253 chars, images=0
+[225/499] Fetching https://novalpie.cc/book/1535/5661192
+  [+] ok: 224 - 外表光鲜意外地是重大事项 (4) (2801 chars, images=0
+[226/499] Fetching https://novalpie.cc/book/1535/5661162
+  [+] ok: 225 - 外表光鲜意外地是重大事项 (5) (3196 chars, images=0
+[227/499] Fetching https://novalpie.cc/book/1535/5661165
+  [+] ok: 226 - 外表华丽意外地是重大事项 (6) (2807 chars, images=0
+[228/499] Fetching https://novalpie.cc/book/1535/5661171
+  [+] ok: 227 - 外表华丽意外地是重大事项 (7) (2909 chars, images=1
+[229/499] Fetching https://novalpie.cc/book/1535/5661341
+  [+] ok: 228 - 의외로 겉멋은 중대사항이다 (8) (3048 chars, images=0
+[230/499] Fetching https://novalpie.cc/book/1535/5661182
+  [+] ok: 229 - 他, 这样对吗...? (2911 chars, images=0
+[231/499] Fetching https://novalpie.cc/book/1535/5661190
+  [+] ok: 230 - 他，这样对吗...? (2) (3202 chars, images=0
+[232/499] Fetching https://novalpie.cc/book/1535/5661199
+  [+] ok: 231 - 그, 이게 맞아요...? (3) (3214 chars, images=0
+[233/499] Fetching https://novalpie.cc/book/1535/5661204
+  [+] ok: 232 - 他，这个对吗...? (4) (2971 chars, images=0
+[234/499] Fetching https://novalpie.cc/book/1535/5661208
+  [+] ok: 233 - 那个，这个对吗...? (5) (3229 chars, images=0
+[235/499] Fetching https://novalpie.cc/book/1535/5661297
+  [+] ok: 234 - 工匠们的分组作业中加入菜鸟 (1) (3009 chars, images=0
+[236/499] Fetching https://novalpie.cc/book/1535/5661218
+  [+] ok: 235 - 工匠们的分组作业中加入菜鸟 (2) (2681 chars, images=0
+[237/499] Fetching https://novalpie.cc/book/1535/5661347
+  [+] ok: 236 - 장인들의 조별과제에 햇병아리 끼얹기 (3) (3071 chars, images=0
+[238/499] Fetching https://novalpie.cc/book/1535/5661227
+  [+] ok: 237 - 工匠们的分组作业中加入菜鸟 (4) (2894 chars, images=0
+[239/499] Fetching https://novalpie.cc/book/1535/5661229
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 238 - 장인들의 조별과제에 햇병아리 끼얹기 (5) (3089 chars, images=0
+[240/499] Fetching https://novalpie.cc/book/1535/5661234
+  [+] ok: 239 - 工匠们的分组作业加入菜鸟 (6) (3007 chars, images=0
+[241/499] Fetching https://novalpie.cc/book/1535/5661239
+  [+] ok: 240 - 结束停滞不前讨论的最简单方法 (1) (3026 chars, images=0
+[242/499] Fetching https://novalpie.cc/book/1535/5661243
+  [+] ok: 241 - 结束停滞不前讨论的最简单方法 (2) (3102 chars, images=0
+[243/499] Fetching https://novalpie.cc/book/1535/5661249
+  [+] ok: 242 - 지지부진한 토의를 끝내는 가장 쉬운 방법 (3) (2841 chars, images=0
+[244/499] Fetching https://novalpie.cc/book/1535/5661254
+  [+] ok: 243 - 드디어 맺어진 노력의 결실 (2892 chars, images=0
+[245/499] Fetching https://novalpie.cc/book/1535/6105041
+  [+] ok: 244 - ...已退回 (3624 chars, images=0
+[246/499] Fetching https://novalpie.cc/book/1535/6105040
+  [+] ok: 245 - 这是什么杀人般的炎热...! (1) (3153 chars, images=0
+[247/499] Fetching https://novalpie.cc/book/1535/6105039
+  [+] ok: 246 - 这是什么要命的高温...! (2) (3065 chars, images=0
+[248/499] Fetching https://novalpie.cc/book/1535/6105038
+  [+] ok: 247 - 这是什么要命的热度...! (3) (3519 chars, images=0
+[249/499] Fetching https://novalpie.cc/book/1535/6105055
+  [+] ok: 248 - 这是什么要命的热度...! (4) (3452 chars, images=1
+[250/499] Fetching https://novalpie.cc/book/1535/6105052
+  [+] ok: 249 - 이 무슨 살인적인 더위...? (5) (2910 chars, images=0
+[251/499] Fetching https://novalpie.cc/book/1535/6105042
+  [+] ok: 250 - 我们侄女太可爱了 (1) (3054 chars, images=0
+[252/499] Fetching https://novalpie.cc/book/1535/6105053
+  [+] ok: 251 - 우리 조카 너무 귀여워요 (2) (3386 chars, images=0
+[253/499] Fetching https://novalpie.cc/book/1535/6105036
+  [+] ok: 252 - 我们侄女太可爱了 (3) (3562 chars, images=0
+[254/499] Fetching https://novalpie.cc/book/1535/6105045
+  [+] ok: 253 - 我们侄女太可爱了 (3) (3046 chars, images=1
+[255/499] Fetching https://novalpie.cc/book/1535/6105056
+  [+] ok: 254 - 우리 조카 너 귀여워요 (4) (3261 chars, images=0
+[256/499] Fetching https://novalpie.cc/book/1535/6105049
+  [+] ok: 255 - 外传. 长公主殿下有太多疑问 (3595 chars, images=0
+[257/499] Fetching https://novalpie.cc/book/1535/6105046
+  [+] ok: 256 - 아기의 볼따구는 중대사항이다 (1) (3293 chars, images=0
+[258/499] Fetching https://novalpie.cc/book/1535/6105043
+  [+] ok: 257 - 宝宝的脸颊肉是大事（2） (3457 chars, images=0
+[259/499] Fetching https://novalpie.cc/book/1535/6105048
+  [+] ok: 258 - 真正的大事原来是这个...？ (1) (3093 chars, images=0
+[260/499] Fetching https://novalpie.cc/book/1535/6105050
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [!] attempt 2 failed: chapter text not ready before timeout
+  [+] ok: 259 - 原来真正的大事另有其事...? (2) (2964 chars, images=0
+[261/499] Fetching https://novalpie.cc/book/1535/6105064
+  [+] ok: 260 - 진짜 중대사항은 따로 있었네...? (3) (2889 chars, images=0
+[262/499] Fetching https://novalpie.cc/book/1535/6105063
+  [+] ok: 261 - 原来还有更重要的事情...? (4) (2750 chars, images=0
+[263/499] Fetching https://novalpie.cc/book/1535/6105044
+  [+] ok: 262 - 暂时遗忘的另一个问题（1） (3052 chars, images=0
+[264/499] Fetching https://novalpie.cc/book/1535/6105075
+  [+] ok: 263 - 문제가 인간관계로 넘어가면 고장 나 버리는 사람 (1) (2831 chars, images=0
+[265/499] Fetching https://novalpie.cc/book/1535/6105062
+  [+] ok: 264 - 当问题涉及人际关系时就会崩溃的人 (2) (3029 chars, images=0
+[266/499] Fetching https://novalpie.cc/book/1535/6105051
+  [+] ok: 265 - 当问题涉及人际关系就会崩溃的人 (3) (2876 chars, images=0
+[267/499] Fetching https://novalpie.cc/book/1535/6105061
+  [+] ok: 266 - 问题一旦涉及人际关系就会崩溃的人 (4) (3075 chars, images=0
+[268/499] Fetching https://novalpie.cc/book/1535/6105074
+  [+] ok: 267 - 성공하면 양손의 꽃, 실패하면 묫자리 조화 두 송이 (1) (2891 chars, images=0
+[269/499] Fetching https://novalpie.cc/book/1535/6105060
+  [+] ok: 268 - 成功则双手捧花，失败则坟地两束花 (2) (2995 chars, images=0
+[270/499] Fetching https://novalpie.cc/book/1535/6105069
+  [+] ok: 269 - 이제 와서 말하기에는 너무 늦어버린 한마디 (1) (3442 chars, images=0
+[271/499] Fetching https://novalpie.cc/book/1535/6105058
+  [+] ok: 270 - 现在说已经太晚的一句话 (2) (3200 chars, images=1
+[272/499] Fetching https://novalpie.cc/book/1535/6105067
+  [+] ok: 271 - 黎明 (1) (3395 chars, images=0
+[273/499] Fetching https://novalpie.cc/book/1535/6105057
+  [+] ok: 272 - 새벽 (2) (3418 chars, images=0
+[274/499] Fetching https://novalpie.cc/book/1535/6105078
+  [!] attempt 1 failed: current chapter title not found in page text
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 273 - 早晨 (1) (3898 chars, images=0
+[275/499] Fetching https://novalpie.cc/book/1535/6105072
+  [+] ok: 274 - 清晨 (2) (3059 chars, images=1
+[276/499] Fetching https://novalpie.cc/book/1535/6105071
+  [+] ok: 275 - 早晨 (3) (3462 chars, images=0
+[277/499] Fetching https://novalpie.cc/book/1535/6105054
+  [+] ok: 276 - 果然请求原谅比请求许可更容易 (3685 chars, images=0
+[278/499] Fetching https://novalpie.cc/book/1535/6105047
+  [+] ok: 277 - 现在我也要做了 (1) (3278 chars, images=0
+[279/499] Fetching https://novalpie.cc/book/1535/6105070
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 278 - 现在我也要做了 (2) (3758 chars, images=0
+[280/499] Fetching https://novalpie.cc/book/1535/6105073
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 279 - 现在我也要做了 (3) (3238 chars, images=0
+[281/499] Fetching https://novalpie.cc/book/1535/6105065
+  [+] ok: 280 - 어디 하고 싶은 대로 해봐 (1) (3146 chars, images=0
+[282/499] Fetching https://novalpie.cc/book/1535/6105059
+  [+] ok: 281 - 按你想做的去做吧 (2) (2821 chars, images=0
+[283/499] Fetching https://novalpie.cc/book/1535/6105077
+  [+] ok: 282 - 어디 하고 싶은 대로 해봐 (3) (3148 chars, images=0
+[284/499] Fetching https://novalpie.cc/book/1535/6105097
+  [+] ok: 283 - 어디 하고 싶은 대로 해봐 (4) (3806 chars, images=0
+[285/499] Fetching https://novalpie.cc/book/1535/6105087
+  [+] ok: 284 - 随心所欲地做吧（5） (3656 chars, images=0
+[286/499] Fetching https://novalpie.cc/book/1535/6105066
+  [+] ok: 285 - 随心所欲地做吧 (6) (3095 chars, images=0
+[287/499] Fetching https://novalpie.cc/book/1535/6105076
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 286 - 随心所欲地做吧 (7) (3616 chars, images=0
+[288/499] Fetching https://novalpie.cc/book/1535/6105089
+  [+] ok: 287 - 即使想继续随心所欲 也有太多不得不做的事 (1) (2780 chars, images=0
+[289/499] Fetching https://novalpie.cc/book/1535/6105082
+  [+] ok: 288 - 即使想随心所欲 但要做的事还是太多 (2) (3190 chars, images=0
+[290/499] Fetching https://novalpie.cc/book/1535/6105085
+  [+] ok: 289 - 계속 마음대로 하고 싶지만 달리 해야 할 일이 너무 많다. (3253 chars, images=0
+[291/499] Fetching https://novalpie.cc/book/1535/6105083
+  [+] ok: 290 - 虽然想继续随心所欲，但还有太多其他事情要做（4） (3050 chars, images=0
+[292/499] Fetching https://novalpie.cc/book/1535/6105086
+  [+] ok: 291 - 虽然想继续随心所欲，但要做的事实在太多（5） (2955 chars, images=0
+[293/499] Fetching https://novalpie.cc/book/1535/6105080
+  [+] ok: 292 - 现在是时候稍微释放一下压力了（1） (3088 chars, images=0
+[294/499] Fetching https://novalpie.cc/book/1535/6105068
+  [+] ok: 293 - 现在是时候慢慢释放压力了（2） (3618 chars, images=0
+[295/499] Fetching https://novalpie.cc/book/1535/6105148
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 294 - 现在是需要缓解压力的时候了 (3) (2995 chars, images=0
+[296/499] Fetching https://novalpie.cc/book/1535/6105113
+  [+] ok: 295 - 现在正是需要慢慢释放压力的时候 (4) (3576 chars, images=1
+[297/499] Fetching https://novalpie.cc/book/1535/6105088
+  [+] ok: 296 - 그래 언젠간 이런 놈이 나올 줄 알았어 (1) (3657 chars, images=0
+[298/499] Fetching https://novalpie.cc/book/1535/6105149
+  [!] attempt 1 failed: current chapter title not found in page text
+  [!] attempt 2 failed: current chapter title not found in page text
+  [+] ok: 297 - 我就知道迟早会有这种家伙出现 (2) (3655 chars, images=0
+[299/499] Fetching https://novalpie.cc/book/1535/6105095
+  [+] ok: 298 - 既然如此我也不能坐视不管 (1) (3445 chars, images=0
+[300/499] Fetching https://novalpie.cc/book/1535/6105084
+  [+] ok: 299 - 既然如此我也不能坐视不管 (2) (3215 chars, images=0
+[301/499] Fetching https://novalpie.cc/book/1535/6105091
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 300 - 既然如此我也不能坐视不管 (3) (3031 chars, images=0
+[302/499] Fetching https://novalpie.cc/book/1535/6105092
+  [+] ok: 301- 既然如此我也不能坐视不管 (4) (3767 chars, images=0
+[303/499] Fetching https://novalpie.cc/book/1535/6105090
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 302 - 既然如此我也不能坐视不管 (5) (2973 chars, images=0
+[304/499] Fetching https://novalpie.cc/book/1535/6105106
+  [!] attempt 1 failed: current chapter title not found in page text
+  [+] ok: 303 - 既然如此我也不能坐视不管 (6) (3307 chars, images=0
+[305/499] Fetching https://novalpie.cc/book/1535/6105079
+  [+] ok: 304 - 아 모르겠다, 일단 즐겨야지 (1) (3273 chars, images=0
+[306/499] Fetching https://novalpie.cc/book/1535/6105093
+  [+] ok: 305 - 啊 不管了，先享受再说 (2) (3055 chars, images=0
+[307/499] Fetching https://novalpie.cc/book/1535/6105094
+  [+] ok: 306 啊，不管了，先享受再说 (4) (3528 chars, images=0
+[308/499] Fetching https://novalpie.cc/book/1535/6105098
+  [+] ok: 307 - 总之头疼的问题解决了，挺好的吧 (2905 chars, images=0
+[309/499] Fetching https://novalpie.cc/book/1535/6105109
+  [+] ok: 308 - 我们关系这么好，你会来参加婚礼的吧？ (1) (3179 chars, images=0
+[310/499] Fetching https://novalpie.cc/book/1535/6105081
+  [+] ok: 309 - 우리 친하니까 결혼식 와줄 거지? (2) (3646 chars, images=0
+[311/499] Fetching https://novalpie.cc/book/1535/6105099
+  [+] ok: 310 - 我们这么熟 会来参加婚礼的吧? (3) (3047 chars, images=0
+[312/499] Fetching https://novalpie.cc/book/1535/6105134
+  [+] ok: 311 - 我们关系这么好，你会来参加婚礼的吧？(4) (3032 chars, images=0
+[313/499] Fetching https://novalpie.cc/book/1535/6105143
+  [+] ok: 312 - 我们关系这么好，你会来参加婚礼的吧？（5） (3149 chars, images=0
+[314/499] Fetching https://novalpie.cc/book/1535/6105114
+  [+] ok: 313 - 哇！难到毫无良心可言！（1） (2998 chars, images=0
+[315/499] Fetching https://novalpie.cc/book/1535/6105104
+  [+] ok: 314 - 哇！难到毫无良心！（2） (3156 chars, images=0
+[316/499] Fetching https://novalpie.cc/book/1535/6105101
+  [+] ok: 315 - 와! 양심 없을 정도로 어려워요! (3) (3271 chars, images=0
+[317/499] Fetching https://novalpie.cc/book/1535/6105115
+  [+] ok: 316 - 비밀스러운 상견례 (1) (3038 chars, images=0
+[318/499] Fetching https://novalpie.cc/book/1535/6105111
+  [+] ok: 317 - 神秘的见面礼 (1) (2921 chars, images=1
+[319/499] Fetching https://novalpie.cc/book/1535/6105119
+  [+] ok: 318 - 神秘的见面礼 (2) (3199 chars, images=0
+[320/499] Fetching https://novalpie.cc/book/1535/6105120
+  [+] ok: 319 - 神秘的见面礼 (3) (2854 chars, images=0
+[321/499] Fetching https://novalpie.cc/book/1535/6105112
+  [+] ok: 320 - 婚礼准备 (1) (3095 chars, images=0
+[322/499] Fetching https://novalpie.cc/book/1535/6105110
+  [+] ok: 321 - 婚礼准备 (2) (3299 chars, images=0
+[323/499] Fetching https://novalpie.cc/book/1535/6105096
+  [+] ok: 322 - 결혼식 준비 (3) (3159 chars, images=0
+[324/499] Fetching https://novalpie.cc/book/1535/6105144
+  [+] ok: 323 - 결혼식 준비 (4) (2953 chars, images=0
+[325/499] Fetching https://novalpie.cc/book/1535/6105103
+  [+] ok: 324 - 위험한 상견례 (1) (2921 chars, images=0
+[326/499] Fetching https://novalpie.cc/book/1535/6105126
+  [+] ok: 325 - 危险的见面礼 (2) (3024 chars, images=0
+[327/499] Fetching https://novalpie.cc/book/1535/6105102
+  [+] ok: 326 - 危险的见面礼 (3) (3023 chars, images=0
+[328/499] Fetching https://novalpie.cc/book/1535/6105122
+  [+] ok: 327 - 危险的见面礼 (4) (3460 chars, images=0
+[329/499] Fetching https://novalpie.cc/book/1535/6105105
+  [+] ok: 328 - 危险的见面礼 (5) (3412 chars, images=0
+[330/499] Fetching https://novalpie.cc/book/1535/6105125
+  [+] ok: 329 - 결혼식 준비 (5) (2890 chars, images=0
+[331/499] Fetching https://novalpie.cc/book/1535/6105155
+  [+] ok: 330 - 婚礼准备 (6) (3217 chars, images=0
+[332/499] Fetching https://novalpie.cc/book/1535/6105121
+  [+] ok: 331 - 결혼식 준비 (7) (3043 chars, images=0
+[333/499] Fetching https://novalpie.cc/book/1535/6105118
+  [+] ok: 332 - 婚礼准备 (8) (3108 chars, images=0
+[334/499] Fetching https://novalpie.cc/book/1535/6105127
+  [+] ok: 333 - 婚礼准备 (9) (3038 chars, images=0
+[335/499] Fetching https://novalpie.cc/book/1535/6105128
+  [+] ok: 334 - 결혼식 준비 (10) (2889 chars, images=0
+[336/499] Fetching https://novalpie.cc/book/1535/6105129
+  [+] ok: 335 - 倒计时 (1) (3066 chars, images=0
+[337/499] Fetching https://novalpie.cc/book/1535/6105130
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [+] ok: 336 - 초읽기 (2) (2936 chars, images=0
+[338/499] Fetching https://novalpie.cc/book/1535/6105133
+  [+] ok: 337 - 초읽기 (3) (3264 chars, images=0
+[339/499] Fetching https://novalpie.cc/book/1535/6105116
+  [+] ok: 338 - 倒计时 (4) (2976 chars, images=0
+[340/499] Fetching https://novalpie.cc/book/1535/6105117
+  [+] ok: 339 - 倒计时 (5) (3052 chars, images=0
+[341/499] Fetching https://novalpie.cc/book/1535/6105146
+  [+] ok: 340 - 婚礼 (1) (3530 chars, images=1
+[342/499] Fetching https://novalpie.cc/book/1535/6105100
+  [+] ok: 341 - 婚礼 (2) (3217 chars, images=0
+[343/499] Fetching https://novalpie.cc/book/1535/6105107
+  [+] ok: 342 - 신혼여?행 (1) (3053 chars, images=0
+[344/499] Fetching https://novalpie.cc/book/1535/6105140
+  [!] attempt 1 failed: chapter text not ready before timeout
+  [+] ok: 343 - 신혼여?행 (2) (3186 chars, images=2
+[345/499] Fetching https://novalpie.cc/book/1535/6105136
+  [+] ok: 344 - 新婚旅行（3） (2955 chars, images=0
+[346/499] Fetching https://novalpie.cc/book/1535/6105132
+  [+] ok: 345 - 신혼여?행 (4) (3061 chars, images=0
+[347/499] Fetching https://novalpie.cc/book/1535/6105108
+  [+] ok: 346 - 新婚旅行（5） (2890 chars, images=0
+[348/499] Fetching https://novalpie.cc/book/1535/6105150
+  [+] ok: 347 - 新婚旅行（6） (3130 chars, images=0
+[349/499] Fetching https://novalpie.cc/book/1535/6105139
+  [+] ok: 348 - 新婚旅行（7） (3380 chars, images=0
+[350/499] Fetching https://novalpie.cc/book/1535/6105152
+  [+] ok: 349 - 新婚旅行 (8) (3676 chars, images=0
+[351/499] Fetching https://novalpie.cc/book/1535/6105151
+  [+] ok: 350 - 新婚 (1) (3321 chars, images=0
+[352/499] Fetching https://novalpie.cc/book/1535/6105131
+  [+] ok: 351 - 신혼 (2) (2981 chars, images=0
+[353/499] Fetching https://novalpie.cc/book/1535/6105138
+  [+] ok: 352 - 新婚 (3) (3435 chars, images=0
+[354/499] Fetching https://novalpie.cc/book/1535/6105135
+  [+] ok: 353 - 只为你展现的模样 (1) (3256 chars, images=1
+[355/499] Fetching https://novalpie.cc/book/1535/6105147
+  [+] ok: 354 - 오직 당신에게만 보여주는 모습 (2) (3648 chars, images=1
+[356/499] Fetching https://novalpie.cc/book/1535/6105137
+  [+] ok: 355 - 只为你展现的模样 (3) (3379 chars, images=1
+[357/499] Fetching https://novalpie.cc/book/1535/6105141
+  [+] ok: 356 - 只为你展现的模样（4） (3756 chars, images=1
+[358/499] Fetching https://novalpie.cc/book/1535/6105154
+

@@ -6,6 +6,7 @@ from __future__ import annotations
 import io
 import sys
 import threading
+import time
 import traceback
 from pathlib import Path
 from typing import Callable
@@ -634,12 +635,46 @@ class NovalPieApp(ctk.CTk):
             print(f"[*] 作者: {meta.author}")
         print(f"[*] 待下载章节: {len(chapter_refs)}")
 
-        # Monkey-patch print_progress 以更新进度条
+        # 计时器
+        _t_start = time.monotonic()
+        _t_last = _t_start
+
+        def _format_duration(seconds: float) -> str:
+            h = int(seconds // 3600)
+            m = int((seconds % 3600) // 60)
+            s = int(seconds % 60)
+            if h > 0:
+                return f"{h}h{m:02d}m{s:02d}s"
+            elif m > 0:
+                return f"{m}m{s:02d}s"
+            return f"{s}s"
+
+        def _update_stats(current: int, total: int):
+            nonlocal _t_last
+            now = time.monotonic()
+            elapsed = now - _t_start
+            interval = now - _t_last
+
+            if interval > 0:
+                rate_ch = current / elapsed  # 章节/秒
+                eta = (total - current) / rate_ch if rate_ch > 0 else 0
+                status = (
+                    f"下载中 ({current}/{total}) | "
+                    f"耗时 {_format_duration(elapsed)} | "
+                    f"速率 {rate_ch:.2f}章/s | "
+                    f"预计剩余 {_format_duration(eta)}"
+                )
+            else:
+                status = f"下载中 ({current}/{total})"
+            self._set_status(status)
+            self._set_progress(current / total if total > 0 else 0)
+            _t_last = now
+
+        # Monkey-patch print_progress 以更新进度条和统计
         _orig_print_progress = utils.print_progress
         def _gui_print_progress(current: int, total: int, title: str):
             _orig_print_progress(current, total, title)
-            self._set_progress(current / total if total > 0 else 0)
-            self._set_status(f"下载中 ({current}/{total}) - {title}")
+            _update_stats(current, total)
         utils.print_progress = _gui_print_progress
 
         # Monkey-patch sleep_between 以支持停止
@@ -664,6 +699,21 @@ class NovalPieApp(ctk.CTk):
         finally:
             utils.print_progress = _orig_print_progress
             utils.sleep_between = _orig_sleep
+
+        # 打印下载统计
+        _t_end = _time.monotonic()
+        _total_elapsed = _t_end - _t_start
+        _total_chars = sum(len(ch.text) for ch in chapters)
+        print(f"\n{'='*50}")
+        print(f"[*] 下载统计")
+        print(f"    总耗时: {_format_duration(_total_elapsed)}")
+        print(f"    成功: {len(chapters)} 章")
+        print(f"    失败: {len(failed_chapters)} 章")
+        print(f"    总字符: {_total_chars:,}")
+        if _total_elapsed > 0:
+            print(f"    平均速率: {len(chapters) / _total_elapsed:.2f} 章/秒")
+            print(f"    字符速率: {_total_chars / _total_elapsed:.0f} 字符/秒")
+        print(f"{'='*50}\n")
 
         if self._stop_event.is_set():
             print("[!] 下载已被用户停止")

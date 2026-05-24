@@ -326,6 +326,7 @@ def download_chapters_with_browser(
                 results.append(cached_ch)
                 print(f"  [=] cached: {cached_ch.title} ({len(cached_ch.text)} chars, images={len(cached_ch.image_urls)}")
                 continue
+            _ch_start = time.monotonic()
             utils.print_progress(i, total, f"Fetching {ch.url}")
             done = False
             last_error = ""
@@ -360,12 +361,14 @@ def download_chapters_with_browser(
                     )
                     results.append(chapter_data)
                     chapter_cache[ch.chapter_id] = chapter_data
-                    print(f"  [+] ok: {title} ({len(text)} chars, images={len(image_urls)}")
+                    _ch_elapsed = time.monotonic() - _ch_start
+                    print(f"  [+] ok: {title} ({len(text)} chars, images={len(image_urls)}, {_ch_elapsed:.1f}s)")
                     done = True
                     break
                 except Exception as e:
                     last_error = str(e)
-                    print(f"  [!] attempt {attempt} failed: {last_error}")
+                    _ch_elapsed = time.monotonic() - _ch_start
+                    print(f"  [!] attempt {attempt} failed: {last_error} ({_ch_elapsed:.1f}s)")
                     if attempt <= config.retryPerChapter:
                         time.sleep(1.0 * attempt)
                         continue
