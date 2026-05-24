@@ -662,7 +662,8 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                     tag_selectors = [
                         ".tags a", ".category a", ".genre a", 
                         "a[href*='tag']", "a[href*='category']",
-                        ".tag a", ".tags span", ".genre span"
+                        ".tag a", ".tags span", ".genre span",
+                        ".tag-item"
                     ]
                     for selector in tag_selectors:
                         tag_els = soup.select(selector)
@@ -743,7 +744,8 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                 tag_selectors = [
                     ".tags a", ".category a", ".genre a", 
                     "a[href*='tag']", "a[href*='category']",
-                    ".tag a", ".tags span", ".genre span"
+                    ".tag a", ".tags span", ".genre span",
+                    ".tag-item"
                 ]
                 for selector in tag_selectors:
                     tag_els = soup.select(selector)
