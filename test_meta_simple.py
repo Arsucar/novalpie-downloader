@@ -10,7 +10,7 @@ from novalpie import fetch_book_meta, make_session, read_cookie_line, sync_playw
 
 print(f'Playwright available: {sync_playwright is not None}')
 
-book_id = 353690
+book_id = 766
 chapter_url = 'https://novalpie.cc/book/353690/8853740'
 
 cookie_line = read_cookie_line('./novalpie.txt')

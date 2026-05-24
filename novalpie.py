@@ -622,6 +622,18 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                             title = t
                 
                 if not description:
+                    desc_els = soup.select(".description-content, .description, .summary, #description, .intro, [class*=desc]")
+                    for el in desc_els:
+                        d = normalize_text(el.get_text(" ", strip=True))
+                        if d and len(d) > 20:
+                            description = d
+                            if not author:
+                                author_match = re.search(r"作者[：:]?\s*([^，。！？]+)", d)
+                                if author_match:
+                                    author = normalize_text(author_match.group(1))
+                            break
+                
+                if not description:
                     meta_desc = soup.select_one("meta[property='og:description'], meta[name='description']")
                     if meta_desc:
                         d = normalize_text(meta_desc.get("content", ""))
@@ -646,18 +658,6 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                         if a_text:
                             author = a_text
                 
-                if not description:
-                    desc_els = soup.select(".description, .summary, #description, .intro, [class*=desc]")
-                    for el in desc_els:
-                        d = normalize_text(el.get_text(" ", strip=True))
-                        if d and len(d) > 20:
-                            description = d
-                            if not author:
-                                author_match = re.search(r"作者[：:]?\s*([^，。！？]+)", d)
-                                if author_match:
-                                    author = normalize_text(author_match.group(1))
-                            break
-                
                 if not tags:
                     tag_selectors = [
                         ".tags a", ".category a", ".genre a", 
@@ -672,6 +672,9 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                             if tag_text and len(tag_text) > 1:
                                 tags.append(tag_text)
                     tags = unique_keep_order(tags)[:10]
+                
+                if description and book_url:
+                    description = description + "\n\n来源: " + book_url
                 
                 context.close()
                 browser.close()
@@ -708,6 +711,17 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                     if t:
                         title = t
             if not description:
+                desc_els = soup.select(".description-content, .description, .summary, #description, .intro, [class*=desc]")
+                for el in desc_els:
+                    d = normalize_text(el.get_text(" ", strip=True))
+                    if d and len(d) > 20:
+                        description = d
+                        if not author:
+                            author_match = re.search(r"作者[：:]?\s*([^，。！？]+)", d)
+                            if author_match:
+                                author = normalize_text(author_match.group(1))
+                        break
+            if not description:
                 meta_desc = soup.select_one("meta[property='og:description'], meta[name='description']")
                 if meta_desc:
                     d = normalize_text(meta_desc.get("content", ""))
@@ -729,17 +743,6 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                     a_text = normalize_text(author_link.get_text(" ", strip=True))
                     if a_text:
                         author = a_text
-            if not description:
-                desc_els = soup.select(".description, .summary, #description, .intro, [class*=desc]")
-                for el in desc_els:
-                    d = normalize_text(el.get_text(" ", strip=True))
-                    if d and len(d) > 20:
-                        description = d
-                        if not author:
-                            author_match = re.search(r"作者[：:]?\s*([^，。！？]+)", d)
-                            if author_match:
-                                author = normalize_text(author_match.group(1))
-                        break
             if not tags:
                 tag_selectors = [
                     ".tags a", ".category a", ".genre a", 
@@ -754,6 +757,9 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                         if tag_text and len(tag_text) > 1:
                             tags.append(tag_text)
                 tags = unique_keep_order(tags)[:10]
+            if description and u == book_url:
+                description = description + "\n\n来源: " + u
+            
             if title and author and description and tags:
                 break
 
