@@ -8,6 +8,7 @@ except Exception:
     PlaywrightTimeoutError = Exception
     sync_playwright = None
 
+from . import cache
 from . import config
 from . import utils
 
@@ -295,6 +296,7 @@ def download_chapters_with_browser(
     cookie_line: str,
     chapter_cache: dict[int, config.ChapterData],
     auth_token: str = "",
+    book_id: int = 0,
 ) -> tuple[list[config.ChapterData], list[config.FailedChapter], dict[int, config.ChapterData]]:
     if sync_playwright is None:
         raise RuntimeError("playwright is not installed")
@@ -361,6 +363,9 @@ def download_chapters_with_browser(
                     )
                     results.append(chapter_data)
                     chapter_cache[ch.chapter_id] = chapter_data
+                    # 增量缓存：每章下载完立即保存
+                    if book_id > 0:
+                        cache.append_chapter_to_cache(book_id, chapter_data)
                     _ch_elapsed = time.monotonic() - _ch_start
                     print(f"  [+] ok: {title} ({len(text)} chars, images={len(image_urls)}, {_ch_elapsed:.1f}s)")
                     done = True

@@ -1,2 +1,3 @@
 [console_scripts]
 novalpie = novalpie:main
+novalpie-gui = novalpie.gui:run_gui

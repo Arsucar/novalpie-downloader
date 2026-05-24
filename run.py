@@ -90,7 +90,7 @@ def main() -> None:
     print(f"[*] Chapters to download: {len(chapter_refs)}")
 
     chapters, failed_chapters, chapter_cache = browser.download_chapters_with_browser(
-        chapter_refs, cookie_line, chapter_cache
+        chapter_refs, cookie_line, chapter_cache, book_id=book_id
     )
     if not chapters:
         print("[x] All chapter downloads failed; no output generated.")

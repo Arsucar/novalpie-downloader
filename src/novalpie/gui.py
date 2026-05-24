@@ -764,16 +764,36 @@ class NovalPieApp(ctk.CTk):
                 elapsed += s
         utils.sleep_between = _checkable_sleep
 
+        # Monkey-patch wait_for_chapter_text 以支持停止
+        _orig_wait = browser.wait_for_chapter_text
+        def _checkable_wait(page, timeout_sec, current_title="", next_title=""):
+            import time as _t
+            deadline = _t.monotonic() + timeout_sec
+            while _t.monotonic() < deadline:
+                if self._stop_event.is_set():
+                    raise KeyboardInterrupt("用户请求停止")
+                try:
+                    return _orig_wait(page, min(timeout_sec, 2.0), current_title, next_title)
+                except Exception:
+                    if self._stop_event.is_set():
+                        raise KeyboardInterrupt("用户请求停止")
+                    remaining = deadline - _t.monotonic()
+                    if remaining <= 0:
+                        raise
+                    _t.sleep(min(0.5, remaining))
+        browser.wait_for_chapter_text = _checkable_wait
+
         try:
             chapters, failed_chapters, chapter_cache = browser.download_chapters_with_browser(
-                chapter_refs, cookie_line, chapter_cache, auth_token=auth_token
+                chapter_refs, cookie_line, chapter_cache, auth_token=auth_token, book_id=book_id
             )
         finally:
             utils.print_progress = _orig_print_progress
             utils.sleep_between = _orig_sleep
+            browser.wait_for_chapter_text = _orig_wait
 
         # 打印下载统计
-        _t_end = _time.monotonic()
+        _t_end = time.monotonic()
         _total_elapsed = _t_end - _t_start
         _total_chars = sum(len(ch.text) for ch in chapters)
         print(f"\n{'='*50}")

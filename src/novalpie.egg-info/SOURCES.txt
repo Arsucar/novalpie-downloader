@@ -6,6 +6,8 @@ src/novalpie/browser.py
 src/novalpie/cache.py
 src/novalpie/config.py
 src/novalpie/exporters.py
+src/novalpie/gui.py
+src/novalpie/login_cookie.py
 src/novalpie/network.py
 src/novalpie/utils.py
 src/novalpie.egg-info/PKG-INFO
