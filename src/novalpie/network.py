@@ -4,8 +4,8 @@ from typing import Any
 import requests
 from bs4 import BeautifulSoup, Tag
 
-import config
-import utils
+from . import config
+from . import utils
 
 try:
     from playwright.sync_api import sync_playwright

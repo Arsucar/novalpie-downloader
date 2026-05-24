@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 from typing import Any
-import config
+from . import config
 
 def clean_filename(name: str) -> str:
     name = re.sub(r"[\\/:*?\"<>|]", "_", (name or "").strip())

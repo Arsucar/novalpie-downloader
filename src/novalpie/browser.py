@@ -8,8 +8,8 @@ except Exception:
     PlaywrightTimeoutError = Exception
     sync_playwright = None
 
-import config
-import utils
+from . import config
+from . import utils
 
 def chapter_text_from_dom(page, current_title: str = "", next_title: str = "") -> tuple[str, str, list[str], str]:
     payload = page.evaluate(

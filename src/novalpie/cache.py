@@ -2,8 +2,8 @@ import json
 from pathlib import Path
 from typing import Dict, List
 
-import config
-import utils
+from . import config
+from . import utils
 
 def get_cache_path(book_id: int) -> Path:
     return Path(config.cacheOutputDir) / f"book_{book_id}_cache.json"

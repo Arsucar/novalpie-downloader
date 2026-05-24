@@ -5,9 +5,9 @@ from typing import List
 
 from ebooklib import epub
 
-import config
-import utils
-import network
+from . import config
+from . import utils
+from . import network
 
 def chapter_to_html(chapter_title: str, chapter_text: str, image_files: List[str] = None) -> str:
     ps = []
