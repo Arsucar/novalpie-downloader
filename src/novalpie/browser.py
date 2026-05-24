@@ -164,7 +164,7 @@ def chapter_text_from_dom(page, current_title: str = "", next_title: str = "") -
                 if (!el) return;
                 const txt = norm(el.innerText || el.textContent || '');
                 if (!txt || txt.length < 80) return;
-                const cls = ((el.className || '') + ' ' + ((el.id || '')).toLowerCase();
+                const cls = ((el.className || '') + ' ' + (el.id || '')).toLowerCase();
                 let score = txt.length + bonus;
                 if (/chapter|content|reader|read|article|text|novel|正文/.test(cls)) score += 1200;
                 if (/comment|footer|header|nav|menu|sidebar|catalog|目录|书评|review|recommend/.test(cls)) score -= 1600;

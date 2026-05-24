@@ -1,7 +1,8 @@
 import sys
-from novalpie import fetch_book_meta, make_session, read_cookie_line
+from novalpie.network import fetch_book_meta, make_session
+from novalpie.utils import read_cookie_line
 
-book_id = 1535
+book_id = 458
 chapter_url = 'https://novalpie.cc/book/1535/352729'
 
 cookie_line = read_cookie_line('./novalpie.txt')

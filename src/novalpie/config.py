@@ -4,7 +4,7 @@ import re
 # Config (edit here)
 
 # bookURL：起始章节链接（必改）
-bookURL = "https://novalpie.cc/book/353690/9581373"
+bookURL = "https://novalpie.cc/book/1535/352729"
 
 # base_url：站点根地址，需与 bookURL 同域名
 base_url = "https://novalpie.cc/"

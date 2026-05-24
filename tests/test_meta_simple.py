@@ -6,7 +6,8 @@ import subprocess
 if 'novalpie' in sys.modules:
     del sys.modules['novalpie']
 
-from novalpie import fetch_book_meta, make_session, read_cookie_line, sync_playwright
+from novalpie.network import fetch_book_meta, make_session, sync_playwright
+from novalpie.utils import read_cookie_line
 
 print(f'Playwright available: {sync_playwright is not None}')
 

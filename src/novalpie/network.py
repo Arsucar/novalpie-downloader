@@ -158,7 +158,24 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
 
     book_url = utils.absolute_url(f"/book/{book_id}")
 
-    if sync_playwright is not None:
+    # 优先尝试 API 获取书籍信息
+    api_url = utils.absolute_url(f"/api/novels/{book_id}")
+    try:
+        resp = session.get(api_url, timeout=(10, config.chapterReadyTimeoutSec))
+        if resp.status_code == 200:
+            payload = resp.json()
+            if isinstance(payload, dict):
+                title = utils.normalize_text(payload.get("title", ""))
+                author = utils.normalize_text(payload.get("author_name", ""))
+                novel_type = utils.normalize_text(payload.get("novel_type", ""))
+                if novel_type:
+                    tags.append(novel_type)
+    except Exception as e:
+        print(f"[!] API fetch failed: {e}", file=sys.stderr)
+
+    # 如果需要补充信息（title/description/tags），尝试 Playwright
+    needs_playwright = not title or not description or not tags
+    if needs_playwright and sync_playwright is not None:
         try:
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=config.headless)
@@ -173,7 +190,7 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                         }])
                 page = context.new_page()
                 page.goto(book_url, wait_until="domcontentloaded", timeout=config.pageGotoTimeoutMs)
-                page.wait_for_timeout(3000)
+                page.wait_for_timeout(8000)
 
                 soup = BeautifulSoup(page.content(), "lxml")
 
@@ -235,20 +252,19 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                         if a_text:
                             author = a_text
 
-                if not tags:
-                    tag_selectors = [
-                        ".tags a", ".category a", ".genre a",
-                        "a[href*='tag']", "a[href*='category']",
-                        ".tag a", ".tags span", ".genre span",
-                        ".tag-item"
-                    ]
-                    for selector in tag_selectors:
-                        tag_els = soup.select(selector)
-                        for el in tag_els:
-                            tag_text = utils.normalize_text(el.get_text(" ", strip=True))
-                            if tag_text and len(tag_text) > 1:
-                                tags.append(tag_text)
-                    tags = utils.unique_keep_order(tags)[:10]
+                tag_selectors = [
+                    ".tags a", ".category a", ".genre a",
+                    "a[href*='tag']", "a[href*='category']",
+                    ".tag a", ".tags span", ".genre span",
+                    ".tag-item"
+                ]
+                for selector in tag_selectors:
+                    tag_els = soup.select(selector)
+                    for el in tag_els:
+                        tag_text = utils.normalize_text(el.get_text(" ", strip=True))
+                        if tag_text and len(tag_text) > 1:
+                            tags.append(tag_text)
+                tags = utils.unique_keep_order(tags)[:10]
 
                 if description and book_url:
                     description = description + "\n\n来源: " + book_url

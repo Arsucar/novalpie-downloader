@@ -90,8 +90,13 @@ def build_epub(
         item.content = chapter_to_html(ch.title, chapter_text, chapter_image_files)
         book.add_item(item)
         spine_items.append(item)
+        toc_items.append(item)
 
-    book.toc = tuple([])
+    if book_meta.tags:
+        for tag in book_meta.tags:
+            book.add_metadata('DC', 'subject', tag)
+
+    book.toc = tuple(toc_items)
     book.spine = spine_items
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())
