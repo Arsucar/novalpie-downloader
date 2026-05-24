@@ -15,6 +15,7 @@ dependencies = [
     "lxml>=4.9.0",
     "ebooklib>=0.18",
     "playwright>=1.40.0",
+    "customtkinter>=5.2.0",
 ]
 
 [project.optional-dependencies]
@@ -24,6 +25,7 @@ dev = [
 
 [project.scripts]
 novalpie = "novalpie:main"
+novalpie-gui = "novalpie.gui:run_gui"
 
 [tool.setuptools.packages.find]
 where = ["src"]
