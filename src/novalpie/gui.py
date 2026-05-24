@@ -1,5 +1,5 @@
 # coding=utf-8
-"""NovalPie GUI - 基于 customtkinter 的现代化图形界面"""
+"""NovalPie GUI - 基于 customtkinter 的现代化图形界面 + 任务队列"""
 
 from __future__ import annotations
 
@@ -8,8 +8,11 @@ import sys
 import threading
 import time
 import traceback
+import uuid
+from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Optional
 from urllib.parse import urlparse
 
 import customtkinter as ctk
@@ -39,6 +42,74 @@ class Colors:
     CARD_BORDER_DARK = "gray28"
 
 
+# ── 任务状态枚举 ────────────────────────────────────────────
+
+class TaskStatus(Enum):
+    PENDING = "等待中"
+    RUNNING = "下载中"
+    DONE = "已完成"
+    FAILED = "失败"
+    STOPPED = "已停止"
+
+
+# ── 下载任务（独立配置 + 独立缓存） ─────────────────────────
+
+@dataclass
+class DownloadTask:
+    """单个下载任务，封装所有独立配置和运行时状态"""
+    # 标识
+    task_id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
+
+    # 输入配置（快照，不依赖全局 config）
+    book_url: str = ""
+    base_url: str = ""
+    cookie_path: str = ""
+    delay_min: float = 2.0
+    delay_max: float = 3.0
+    timeout: float = 35.0
+    retry: int = 4
+    max_chapters: int = 0
+    first_wait: float = 10.0
+    headless: bool = True
+    start_from_current: bool = True
+    keep_failed: bool = True
+    epub_dir: str = "./epubBooks_novalpie"
+    txt_dir: str = "./txtBooks_novalpie"
+    cache_dir: str = "./cache_novalpie"
+
+    # 运行时状态（任务专属，不共享）
+    status: TaskStatus = TaskStatus.PENDING
+    progress: float = 0.0
+    status_text: str = "等待中"
+    book_title: str = ""
+    total_chapters: int = 0
+    downloaded_chapters: int = 0
+
+    # 运行时数据（任务完成后释放）
+    _chapter_cache: Optional[dict] = field(default=None, repr=False)
+    _chapters_result: Optional[list] = field(default=None, repr=False)
+    _failed_chapters: Optional[list] = field(default=None, repr=False)
+
+    def memory_footprint_mb(self) -> float:
+        """估算当前内存占用（MB）"""
+        size = 0
+        if self._chapter_cache:
+            for ch in self._chapter_cache.values():
+                if hasattr(ch, 'text'):
+                    size += len(ch.text) * 2  # UTF-16 approx
+        if self._chapters_result:
+            for ch in self._chapters_result:
+                if hasattr(ch, 'text'):
+                    size += len(ch.text) * 2
+        return size / (1024 * 1024)
+
+    def release_memory(self):
+        """释放任务运行时数据，保留磁盘缓存"""
+        self._chapter_cache = None
+        self._chapters_result = None
+        self._failed_chapters = None
+
+
 # ── 日志重定向 ──────────────────────────────────────────────
 
 class TextHandler(io.TextIOBase):
@@ -60,7 +131,6 @@ class TextHandler(io.TextIOBase):
 # ── 主应用 ──────────────────────────────────────────────────
 
 class NovalPieApp(ctk.CTk):
-    # 默认字体大小
     DEFAULT_FONT_SIZE = 20
     FONT_SIZE_MIN = 15
     FONT_SIZE_MAX = 30
@@ -68,15 +138,18 @@ class NovalPieApp(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("NovalPie 小说下载器")
-        self.geometry("820x750")
-        self.minsize(720, 620)
+        self.geometry("900x800")
+        self.minsize(780, 650)
 
         self._stop_event = threading.Event()
         self._running = False
         self._font_size = self.DEFAULT_FONT_SIZE
+        self._font_widgets: list[tuple] = []
 
-        # 收集所有需要随字体大小变化的控件
-        self._font_widgets: list[tuple] = []  # (widget, type, extra)
+        # 任务队列
+        self._task_queue: list[DownloadTask] = []
+        self._queue_lock = threading.Lock()
+        self._worker_thread: Optional[threading.Thread] = None
 
         self._build_ui()
 
@@ -86,11 +159,9 @@ class NovalPieApp(ctk.CTk):
         return ctk.CTkFont(size=self._font_size + size_offset, weight=weight)
 
     def _register_font(self, widget, wtype: str, extra: dict | None = None):
-        """注册控件以便字体大小变化时批量更新"""
         self._font_widgets.append((widget, wtype, extra or {}))
 
     def _apply_font_size(self, size: int):
-        """动态更新所有注册控件的字体"""
         self._font_size = size
         for widget, wtype, extra in self._font_widgets:
             try:
@@ -120,10 +191,9 @@ class NovalPieApp(ctk.CTk):
     # ── UI 构建 ──────────────────────────────────────────────
 
     def _build_ui(self):
-        # 主容器
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)   # Tabview 区域可扩展
-        self.grid_rowconfigure(2, weight=0)   # 底部栏固定
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=0)
 
         # ========== 顶部标题栏 ==========
         top_frame = ctk.CTkFrame(self, fg_color="transparent")
@@ -131,48 +201,37 @@ class NovalPieApp(ctk.CTk):
         top_frame.grid_columnconfigure(1, weight=1)
 
         title_label = ctk.CTkLabel(
-            top_frame,
-            text="NovalPie 小说下载器",
-            font=self._font(8, "bold"),
-            text_color=Colors.PRIMARY,
+            top_frame, text="NovalPie 小说下载器",
+            font=self._font(8, "bold"), text_color=Colors.PRIMARY,
         )
         title_label.grid(row=0, column=0, sticky="w")
         self._register_font(title_label, "label", {"offset": 8, "weight": "bold"})
 
         subtitle_label = ctk.CTkLabel(
-            top_frame,
-            text="轻松下载你喜爱的小说",
-            font=self._font(-2),
-            text_color="gray60",
+            top_frame, text="轻松下载你喜爱的小说",
+            font=self._font(-2), text_color="gray60",
         )
         subtitle_label.grid(row=0, column=1, sticky="w", padx=(10, 0))
         self._register_font(subtitle_label, "label", {"offset": -2})
 
-        # 字体大小控制
         font_ctrl = ctk.CTkFrame(top_frame, fg_color="transparent")
         font_ctrl.grid(row=0, column=2, sticky="e")
 
         self.label_font_size = ctk.CTkLabel(
-            font_ctrl,
-            text=f"字体大小: {self._font_size}",
-            font=self._font(-2),
-            width=110,
+            font_ctrl, text=f"字体大小: {self._font_size}",
+            font=self._font(-2), width=110,
         )
         self.label_font_size.pack(side="left", padx=(0, 6))
         self._register_font(self.label_font_size, "slider_label", {"offset": -2})
 
         self.slider_font = ctk.CTkSlider(
-            font_ctrl,
-            from_=self.FONT_SIZE_MIN,
-            to=self.FONT_SIZE_MAX,
-            number_of_steps=14,
-            width=120,
-            command=self._on_font_size_change,
+            font_ctrl, from_=self.FONT_SIZE_MIN, to=self.FONT_SIZE_MAX,
+            number_of_steps=14, width=120, command=self._on_font_size_change,
         )
         self.slider_font.set(self._font_size)
         self.slider_font.pack(side="left")
 
-        # ========== Tabview (设置页 + 日志页) ==========
+        # ========== Tabview (设置 + 任务队列 + 日志) ==========
         self.tabview = ctk.CTkTabview(
             self, corner_radius=12,
             fg_color=(Colors.CARD_LIGHT, Colors.CARD_DARK),
@@ -180,9 +239,79 @@ class NovalPieApp(ctk.CTk):
         self.tabview.grid(row=1, column=0, sticky="nsew", padx=20, pady=(5, 5))
 
         self.tabview.add("设置")
+        self.tabview.add("任务队列")
         self.tabview.add("日志")
 
-        # ----- 设置标签页内容 -----
+        self._build_settings_tab()
+        self._build_queue_tab()
+        self._build_log_tab()
+
+        # ========== 底部固定栏 ==========
+        bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
+        bottom_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=(0, 15))
+        bottom_frame.grid_columnconfigure(0, weight=1)
+
+        progress_card = ctk.CTkFrame(
+            bottom_frame, corner_radius=12,
+            fg_color=(Colors.CARD_LIGHT, Colors.CARD_DARK),
+            border_width=1,
+            border_color=(Colors.CARD_BORDER_LIGHT, Colors.CARD_BORDER_DARK),
+        )
+        progress_card.pack(fill="x", pady=(0, 8))
+
+        progress_inner = ctk.CTkFrame(progress_card, fg_color="transparent")
+        progress_inner.pack(fill="both", padx=15, pady=10)
+
+        self.progress_bar = ctk.CTkProgressBar(
+            progress_inner, height=8, corner_radius=4, progress_color=Colors.PRIMARY,
+        )
+        self.progress_bar.pack(fill="x", pady=(0, 8))
+        self.progress_bar.set(0)
+
+        self.label_status = ctk.CTkLabel(
+            progress_inner, text="就绪",
+            font=self._font(-2), text_color=("gray40", "gray70"),
+        )
+        self.label_status.pack(anchor="w")
+        self._register_font(self.label_status, "label", {"offset": -2})
+
+        btn_frame = ctk.CTkFrame(bottom_frame, fg_color="transparent")
+        btn_frame.pack(fill="x")
+
+        btn_inner = ctk.CTkFrame(btn_frame, fg_color="transparent")
+        btn_inner.pack()
+
+        self.btn_start = ctk.CTkButton(
+            btn_inner, text="开始下载",
+            font=self._font(1, "bold"), height=42, corner_radius=10,
+            fg_color=Colors.SUCCESS, hover_color=Colors.SUCCESS_HOVER,
+            command=self._on_start,
+        )
+        self.btn_start.pack(side="left", padx=(0, 10))
+        self._register_font(self.btn_start, "button", {"offset": 1, "weight": "bold"})
+
+        self.btn_stop = ctk.CTkButton(
+            btn_inner, text="停止",
+            font=self._font(1, "bold"), height=42, corner_radius=10,
+            fg_color=Colors.DANGER, hover_color=Colors.DANGER_HOVER,
+            command=self._on_stop, state="disabled",
+        )
+        self.btn_stop.pack(side="left", padx=(0, 10))
+        self._register_font(self.btn_stop, "button", {"offset": 1, "weight": "bold"})
+
+        self.btn_clear = ctk.CTkButton(
+            btn_inner, text="清空日志",
+            font=self._font(), height=42, corner_radius=10,
+            fg_color="transparent", border_width=2, border_color="gray50",
+            text_color=("gray30", "gray80"), hover_color=("gray90", "gray25"),
+            command=self._on_clear_log,
+        )
+        self.btn_clear.pack(side="left")
+        self._register_font(self.btn_clear, "button", {"offset": 0})
+
+    # ── 设置标签页 ──────────────────────────────────────────
+
+    def _build_settings_tab(self):
         settings_tab = self.tabview.tab("设置")
         settings_tab.grid_columnconfigure(0, weight=1)
         settings_tab.grid_rowconfigure(0, weight=1)
@@ -193,7 +322,6 @@ class NovalPieApp(ctk.CTk):
         scroll_frame.grid(row=0, column=0, sticky="nsew")
         scroll_frame.grid_columnconfigure(0, weight=1)
 
-        # ── 基本设置卡片 ──
         basic_card = self._create_card(scroll_frame, "基本设置", "🔗")
         basic_card.grid_columnconfigure(0, weight=1)
 
@@ -210,25 +338,21 @@ class NovalPieApp(ctk.CTk):
             placeholder="cookie.txt",
         )
 
-        # ── 下载设置卡片 ──
         dl_card = self._create_card(scroll_frame, "下载设置", "⚙️")
         dl_card.grid_columnconfigure((0, 1), weight=1)
 
-        # 预设方案按钮
         preset_frame = ctk.CTkFrame(dl_card, fg_color="transparent")
         preset_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=(0, 5))
         preset_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
 
         ctk.CTkLabel(
             preset_frame, text="预设方案:",
-            font=self._font(-1),
-            text_color=("gray50", "gray60"),
+            font=self._font(-1), text_color=("gray50", "gray60"),
         ).grid(row=0, column=0, sticky="w", padx=(0, 5))
 
         btn_conservative = ctk.CTkButton(
             preset_frame, text="保守", height=28, corner_radius=6,
-            font=self._font(-2),
-            fg_color=Colors.PRIMARY, hover_color=Colors.PRIMARY_HOVER,
+            font=self._font(-2), fg_color=Colors.PRIMARY, hover_color=Colors.PRIMARY_HOVER,
             command=self._apply_preset_conservative,
         )
         btn_conservative.grid(row=0, column=1, padx=2)
@@ -236,8 +360,7 @@ class NovalPieApp(ctk.CTk):
 
         btn_balanced = ctk.CTkButton(
             preset_frame, text="均衡", height=28, corner_radius=6,
-            font=self._font(-2),
-            fg_color=Colors.PRIMARY, hover_color=Colors.PRIMARY_HOVER,
+            font=self._font(-2), fg_color=Colors.PRIMARY, hover_color=Colors.PRIMARY_HOVER,
             command=self._apply_preset_balanced,
         )
         btn_balanced.grid(row=0, column=2, padx=2)
@@ -245,14 +368,12 @@ class NovalPieApp(ctk.CTk):
 
         btn_aggressive = ctk.CTkButton(
             preset_frame, text="激进", height=28, corner_radius=6,
-            font=self._font(-2),
-            fg_color=Colors.WARNING, hover_color=Colors.WARNING_HOVER,
+            font=self._font(-2), fg_color=Colors.WARNING, hover_color=Colors.WARNING_HOVER,
             command=self._apply_preset_aggressive,
         )
         btn_aggressive.grid(row=0, column=3, padx=2)
         self._register_font(btn_aggressive, "button", {"offset": -2})
 
-        # 输入行
         self.entry_delay_min = self._create_inline_input(
             dl_card, "章节间隔(秒) 最小", str(config.chapterDelayMinSec), row=1, col=0,
         )
@@ -272,7 +393,6 @@ class NovalPieApp(ctk.CTk):
             dl_card, "首章额外等待(秒)", str(config.firstChapterExtraWaitSec), row=3, col=1,
         )
 
-        # ── 选项卡片 ──
         opt_card = self._create_card(scroll_frame, "选项", "🎛️")
         opt_card.grid_columnconfigure((0, 1), weight=1)
 
@@ -285,7 +405,6 @@ class NovalPieApp(ctk.CTk):
         self.var_keep_failed = ctk.BooleanVar(value=config.keepFailedChapterPlaceholder)
         self._create_switch(opt_card, "保留失败章节占位", self.var_keep_failed, row=1, col=0)
 
-        # ── 输出目录卡片 ──
         out_card = self._create_card(scroll_frame, "输出目录", "📁")
         out_card.grid_columnconfigure(0, weight=1)
 
@@ -299,7 +418,75 @@ class NovalPieApp(ctk.CTk):
             out_card, "缓存目录", config.cacheOutputDir,
         )
 
-        # ----- 日志标签页内容 -----
+    # ── 任务队列标签页 ──────────────────────────────────────
+
+    def _build_queue_tab(self):
+        queue_tab = self.tabview.tab("任务队列")
+        queue_tab.grid_columnconfigure(0, weight=1)
+        queue_tab.grid_rowconfigure(0, weight=1)
+
+        # 任务列表
+        self.queue_frame = ctk.CTkScrollableFrame(
+            queue_tab, corner_radius=0, fg_color="transparent",
+        )
+        self.queue_frame.grid(row=0, column=0, sticky="nsew", padx=15, pady=(15, 5))
+        self.queue_frame.grid_columnconfigure(0, weight=1)
+
+        # 空状态提示
+        self.label_queue_empty = ctk.CTkLabel(
+            queue_tab, text="暂无任务，请在设置页填写链接后点击「添加到队列」",
+            font=self._font(-2), text_color="gray50",
+        )
+        self.label_queue_empty.grid(row=0, column=0, sticky="n")
+        self._register_font(self.label_queue_empty, "label", {"offset": -2})
+
+        # 底部操作栏
+        queue_bottom = ctk.CTkFrame(queue_tab, fg_color="transparent")
+        queue_bottom.grid(row=1, column=0, sticky="ew", padx=15, pady=(5, 15))
+        queue_bottom.grid_columnconfigure(0, weight=1)
+
+        info_frame = ctk.CTkFrame(queue_bottom, fg_color="transparent")
+        info_frame.grid(row=0, column=0, sticky="w")
+
+        self.label_queue_info = ctk.CTkLabel(
+            info_frame, text="队列: 0 个任务",
+            font=self._font(-3), text_color="gray50",
+        )
+        self.label_queue_info.pack(side="left")
+        self._register_font(self.label_queue_info, "label", {"offset": -3})
+
+        btn_frame = ctk.CTkFrame(queue_bottom, fg_color="transparent")
+        btn_frame.grid(row=0, column=1, sticky="e")
+
+        self.btn_add_queue = ctk.CTkButton(
+            btn_frame, text="添加到队列", height=32, corner_radius=8,
+            font=self._font(-2), fg_color=Colors.PRIMARY, hover_color=Colors.PRIMARY_HOVER,
+            command=self._on_add_to_queue,
+        )
+        self.btn_add_queue.pack(side="left", padx=(0, 8))
+        self._register_font(self.btn_add_queue, "button", {"offset": -2})
+
+        self.btn_remove_selected = ctk.CTkButton(
+            btn_frame, text="删除选中", height=32, corner_radius=8,
+            font=self._font(-2), fg_color=Colors.DANGER, hover_color=Colors.DANGER_HOVER,
+            command=self._on_remove_selected, state="disabled",
+        )
+        self.btn_remove_selected.pack(side="left", padx=(0, 8))
+        self._register_font(self.btn_remove_selected, "button", {"offset": -2})
+
+        self.btn_clear_done = ctk.CTkButton(
+            btn_frame, text="清除已完成", height=32, corner_radius=8,
+            font=self._font(-2), fg_color="gray50", hover_color="gray40",
+            command=self._on_clear_done,
+        )
+        self.btn_clear_done.pack(side="left")
+        self._register_font(self.btn_clear_done, "button", {"offset": -2})
+
+        self._queue_widgets: dict[str, dict] = {}  # task_id -> widgets
+
+    # ── 日志标签页 ──────────────────────────────────────────
+
+    def _build_log_tab(self):
         log_tab = self.tabview.tab("日志")
         log_tab.grid_columnconfigure(0, weight=1)
         log_tab.grid_rowconfigure(0, weight=1)
@@ -311,77 +498,6 @@ class NovalPieApp(ctk.CTk):
         )
         self.text_log.grid(row=0, column=0, sticky="nsew", padx=15, pady=15)
         self._register_font(self.text_log, "textbox", {"family": "Consolas", "offset": -2})
-
-        # ========== 底部固定栏（进度条 + 按钮） ==========
-        bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
-        bottom_frame.grid(row=2, column=0, sticky="ew", padx=20, pady=(0, 15))
-        bottom_frame.grid_columnconfigure(0, weight=1)
-
-        # 进度卡片
-        progress_card = ctk.CTkFrame(
-            bottom_frame, corner_radius=12,
-            fg_color=(Colors.CARD_LIGHT, Colors.CARD_DARK),
-            border_width=1,
-            border_color=(Colors.CARD_BORDER_LIGHT, Colors.CARD_BORDER_DARK),
-        )
-        progress_card.pack(fill="x", pady=(0, 8))
-
-        progress_inner = ctk.CTkFrame(progress_card, fg_color="transparent")
-        progress_inner.pack(fill="both", padx=15, pady=10)
-
-        self.progress_bar = ctk.CTkProgressBar(
-            progress_inner, height=8, corner_radius=4,
-            progress_color=Colors.PRIMARY,
-        )
-        self.progress_bar.pack(fill="x", pady=(0, 8))
-        self.progress_bar.set(0)
-
-        self.label_status = ctk.CTkLabel(
-            progress_inner, text="就绪",
-            font=self._font(-2),
-            text_color=("gray40", "gray70"),
-        )
-        self.label_status.pack(anchor="w")
-        self._register_font(self.label_status, "label", {"offset": -2})
-
-        # 按钮栏
-        btn_frame = ctk.CTkFrame(bottom_frame, fg_color="transparent")
-        btn_frame.pack(fill="x")
-
-        btn_inner = ctk.CTkFrame(btn_frame, fg_color="transparent")
-        btn_inner.pack()
-
-        self.btn_start = ctk.CTkButton(
-            btn_inner, text="开始下载",
-            font=self._font(1, "bold"),
-            height=42, corner_radius=10,
-            fg_color=Colors.SUCCESS, hover_color=Colors.SUCCESS_HOVER,
-            command=self._on_start,
-        )
-        self.btn_start.pack(side="left", padx=(0, 10))
-        self._register_font(self.btn_start, "button", {"offset": 1, "weight": "bold"})
-
-        self.btn_stop = ctk.CTkButton(
-            btn_inner, text="停止",
-            font=self._font(1, "bold"),
-            height=42, corner_radius=10,
-            fg_color=Colors.DANGER, hover_color=Colors.DANGER_HOVER,
-            command=self._on_stop, state="disabled",
-        )
-        self.btn_stop.pack(side="left", padx=(0, 10))
-        self._register_font(self.btn_stop, "button", {"offset": 1, "weight": "bold"})
-
-        self.btn_clear = ctk.CTkButton(
-            btn_inner, text="清空日志",
-            font=self._font(),
-            height=42, corner_radius=10,
-            fg_color="transparent", border_width=2, border_color="gray50",
-            text_color=("gray30", "gray80"),
-            hover_color=("gray90", "gray25"),
-            command=self._on_clear_log,
-        )
-        self.btn_clear.pack(side="left")
-        self._register_font(self.btn_clear, "button", {"offset": 0})
 
     # ── 卡片/控件工厂方法 ───────────────────────────────────
 
@@ -399,10 +515,8 @@ class NovalPieApp(ctk.CTk):
         header.pack_propagate(False)
 
         header_label = ctk.CTkLabel(
-            header,
-            text=f"{icon} {title}" if icon else title,
-            font=self._font(1, "bold"),
-            text_color=("gray20", "gray90"),
+            header, text=f"{icon} {title}" if icon else title,
+            font=self._font(1, "bold"), text_color=("gray20", "gray90"),
         )
         header_label.pack(side="left")
         self._register_font(header_label, "label", {"offset": 1, "weight": "bold"})
@@ -425,8 +539,7 @@ class NovalPieApp(ctk.CTk):
         label_text = f"{label} {'*' if required else ''}"
         lbl = ctk.CTkLabel(
             label_frame, text=label_text,
-            font=self._font(-2),
-            text_color=("gray40", "gray70"),
+            font=self._font(-2), text_color=("gray40", "gray70"),
         )
         lbl.pack(side="left")
         self._register_font(lbl, "label", {"offset": -2})
@@ -434,18 +547,15 @@ class NovalPieApp(ctk.CTk):
         if required:
             req_lbl = ctk.CTkLabel(
                 label_frame, text="(必填)",
-                font=self._font(-4),
-                text_color="red",
+                font=self._font(-4), text_color="red",
             )
             req_lbl.pack(side="left", padx=(5, 0))
             self._register_font(req_lbl, "label", {"offset": -4})
 
         entry = ctk.CTkEntry(
-            group, placeholder_text=placeholder,
-            height=36, corner_radius=8, border_width=1,
-            fg_color=("gray97", "gray20"),
-            border_color=("gray70", "gray50"),
-            font=self._font(-2),
+            group, placeholder_text=placeholder, height=36, corner_radius=8,
+            border_width=1, fg_color=("gray97", "gray20"),
+            border_color=("gray70", "gray50"), font=self._font(-2),
         )
         entry.pack(fill="x", pady=(4, 0))
         entry.insert(0, default)
@@ -457,13 +567,13 @@ class NovalPieApp(ctk.CTk):
         self, parent, label: str, default: str, row: int, col: int,
     ) -> ctk.CTkEntry:
         frame = ctk.CTkFrame(parent, fg_color="transparent")
-        frame.grid(row=row, column=col, sticky="ew", padx=(0 if col == 0 else 10, 0 if col == 1 else 10), pady=5)
+        frame.grid(row=row, column=col, sticky="ew",
+                   padx=(0 if col == 0 else 10, 0 if col == 1 else 10), pady=5)
         frame.grid_columnconfigure(0, weight=1)
 
         if label:
             lbl = ctk.CTkLabel(
-                frame, text=label,
-                font=self._font(-2),
+                frame, text=label, font=self._font(-2),
                 text_color=("gray40", "gray70"),
             )
             lbl.pack(anchor="w", pady=(0, 2))
@@ -471,8 +581,7 @@ class NovalPieApp(ctk.CTk):
 
         entry = ctk.CTkEntry(
             frame, height=34, corner_radius=8, border_width=1,
-            fg_color=("gray97", "gray20"),
-            border_color=("gray70", "gray50"),
+            fg_color=("gray97", "gray20"), border_color=("gray70", "gray50"),
             font=self._font(-2),
         )
         entry.pack(fill="x")
@@ -487,8 +596,7 @@ class NovalPieApp(ctk.CTk):
 
         sw = ctk.CTkSwitch(
             frame, text=text, variable=variable,
-            font=self._font(-1),
-            progress_color=Colors.PRIMARY,
+            font=self._font(-1), progress_color=Colors.PRIMARY,
         )
         sw.pack(side="left")
         self._register_font(sw, "switch", {"offset": -1})
@@ -497,7 +605,7 @@ class NovalPieApp(ctk.CTk):
 
     # ── 预设方案 ────────────────────────────────────────────
 
-    def _apply_preset(self, delay_min: float, delay_max: float, timeout: float, retry: int, first_wait: float):
+    def _apply_preset(self, delay_min, delay_max, timeout, retry, first_wait):
         if not hasattr(self, 'entry_delay_min'):
             return
         self.entry_delay_min.delete(0, "end")
@@ -512,17 +620,14 @@ class NovalPieApp(ctk.CTk):
         self.entry_first_wait.insert(0, str(first_wait))
 
     def _apply_preset_conservative(self):
-        """保守：间隔 1.0~1.5s，超时 20s，重试 2 次，首章 3s"""
         self._apply_preset(1.0, 1.5, 20, 2, 3)
         self._log("[*] 已应用预设: 保守\n")
 
     def _apply_preset_balanced(self):
-        """均衡：间隔 0.8~1.2s，超时 15s，重试 2 次，首章 2s"""
         self._apply_preset(0.8, 1.2, 15, 2, 2)
         self._log("[*] 已应用预设: 均衡\n")
 
     def _apply_preset_aggressive(self):
-        """激进：间隔 0.5~1.0s，超时 15s，重试 1 次，首章 1s"""
         self._apply_preset(0.5, 1.0, 15, 1, 1)
         self._log("[*] 已应用预设: 激进（注意封号风险）\n")
 
@@ -537,7 +642,6 @@ class NovalPieApp(ctk.CTk):
 
     def _apply_ui_to_config(self) -> list[str]:
         errors: list[str] = []
-
         config.bookURL = self.entry_book_url.get().strip()
         config.base_url = self.entry_base_url.get().strip()
         config.cookieFilePath = self.entry_cookie.get().strip()
@@ -570,12 +674,31 @@ class NovalPieApp(ctk.CTk):
         config.headless = self.var_headless.get()
         config.startFromCurrentChapter = self.var_from_current.get()
         config.keepFailedChapterPlaceholder = self.var_keep_failed.get()
-
         config.epubOutputDir = self.entry_epub_dir.get().strip()
         config.txtOutputDir = self.entry_txt_dir.get().strip()
         config.cacheOutputDir = self.entry_cache_dir.get().strip()
 
         return errors
+
+    def _snapshot_task_from_ui(self) -> DownloadTask:
+        """从当前 UI 快照创建一个独立的任务配置"""
+        return DownloadTask(
+            book_url=self.entry_book_url.get().strip(),
+            base_url=self.entry_base_url.get().strip(),
+            cookie_path=self.entry_cookie.get().strip(),
+            delay_min=float(self.entry_delay_min.get().strip() or "2.0"),
+            delay_max=float(self.entry_delay_max.get().strip() or "3.0"),
+            timeout=float(self.entry_timeout.get().strip() or "35.0"),
+            retry=int(self.entry_retry.get().strip() or "4"),
+            max_chapters=int(self.entry_max_chapters.get().strip() or "0"),
+            first_wait=float(self.entry_first_wait.get().strip() or "10.0"),
+            headless=self.var_headless.get(),
+            start_from_current=self.var_from_current.get(),
+            keep_failed=self.var_keep_failed.get(),
+            epub_dir=self.entry_epub_dir.get().strip(),
+            txt_dir=self.entry_txt_dir.get().strip(),
+            cache_dir=self.entry_cache_dir.get().strip(),
+        )
 
     # ── 日志输出 ────────────────────────────────────────────
 
@@ -595,27 +718,215 @@ class NovalPieApp(ctk.CTk):
             self.progress_bar.set(value)
         self.after(0, _update)
 
-    # ── 按钮回调 ────────────────────────────────────────────
+    # ── 任务队列管理 ────────────────────────────────────────
 
-    def _on_start(self):
+    def _on_add_to_queue(self):
         errors = self._apply_ui_to_config()
         if errors:
             self._log("\n".join(f"[x] {e}" for e in errors) + "\n")
             return
-
         if not config.bookURL:
             self._log("[x] 请填写书籍章节链接\n")
             return
+
+        task = self._snapshot_task_from_ui()
+        task.book_title = f"任务 #{len(self._task_queue) + 1}"
+
+        with self._queue_lock:
+            self._task_queue.append(task)
+
+        self._log(f"[+] 已添加任务到队列: {task.book_url} (ID: {task.task_id})\n")
+        self._refresh_queue_ui()
+
+    def _on_remove_selected(self):
+        to_remove = [tid for tid, w in self._queue_widgets.items() if w.get("var", ctk.BooleanVar(value=False)).get()]
+        if not to_remove:
+            return
+
+        with self._queue_lock:
+            self._task_queue = [t for t in self._task_queue if t.task_id not in to_remove]
+
+        for tid in to_remove:
+            if tid in self._queue_widgets:
+                for widget in self._queue_widgets[tid].values():
+                    if hasattr(widget, 'destroy'):
+                        widget.destroy()
+                del self._queue_widgets[tid]
+
+        self._log(f"[-] 已删除 {len(to_remove)} 个任务\n")
+        self._refresh_queue_ui()
+
+    def _on_clear_done(self):
+        with self._queue_lock:
+            done_ids = {t.task_id for t in self._task_queue if t.status in (TaskStatus.DONE, TaskStatus.FAILED, TaskStatus.STOPPED)}
+            self._task_queue = [t for t in self._task_queue if t.status not in (TaskStatus.DONE, TaskStatus.FAILED, TaskStatus.STOPPED)]
+
+        for tid in done_ids:
+            if tid in self._queue_widgets:
+                for widget in self._queue_widgets[tid].values():
+                    if hasattr(widget, 'destroy'):
+                        widget.destroy()
+                del self._queue_widgets[tid]
+
+        self._log(f"[*] 已清除 {len(done_ids)} 个已完成任务\n")
+        self._refresh_queue_ui()
+
+    def _refresh_queue_ui(self):
+        """刷新任务队列 UI"""
+        def _update():
+            # 清除旧控件
+            for tid, widgets in self._queue_widgets.items():
+                for w in widgets.values():
+                    if hasattr(w, 'destroy'):
+                        w.destroy()
+            self._queue_widgets.clear()
+
+            # 重建
+            for i, task in enumerate(self._task_queue):
+                self._create_queue_item(task, i)
+
+            # 更新空状态
+            has_items = len(self._task_queue) > 0
+            self.label_queue_empty.grid_remove() if has_items else self.label_queue_empty.grid()
+            self.label_queue_info.configure(text=f"队列: {len(self._task_queue)} 个任务")
+
+            # 更新按钮状态
+            self.btn_remove_selected.configure(state="normal" if has_items else "disabled")
+
+        self.after(0, _update)
+
+    def _create_queue_item(self, task: DownloadTask, index: int):
+        """创建单个任务队列项 UI"""
+        item_frame = ctk.CTkFrame(
+            self.queue_frame, corner_radius=10,
+            fg_color=(Colors.CARD_LIGHT, Colors.CARD_DARK),
+            border_width=1,
+            border_color=(Colors.CARD_BORDER_LIGHT, Colors.CARD_BORDER_DARK),
+        )
+        item_frame.pack(fill="x", pady=4)
+
+        var = ctk.BooleanVar(value=False)
+        chk = ctk.CTkCheckBox(item_frame, text="", variable=var, width=20)
+        chk.grid(row=0, column=0, padx=(10, 5), pady=8, sticky="w")
+
+        # 状态指示
+        status_colors = {
+            TaskStatus.PENDING: "gray50",
+            TaskStatus.RUNNING: Colors.PRIMARY,
+            TaskStatus.DONE: Colors.SUCCESS,
+            TaskStatus.FAILED: Colors.DANGER,
+            TaskStatus.STOPPED: Colors.WARNING,
+        }
+        status_label = ctk.CTkLabel(
+            item_frame, text=task.status.value,
+            font=self._font(-4), text_color=status_colors.get(task.status, "gray50"),
+            width=60,
+        )
+        status_label.grid(row=0, column=1, padx=5, sticky="w")
+
+        # 书名/URL
+        title_text = task.book_title or task.book_url
+        if len(title_text) > 50:
+            title_text = title_text[:47] + "..."
+        title_label = ctk.CTkLabel(
+            item_frame, text=title_text,
+            font=self._font(-2), text_color=("gray20", "gray90"),
+            anchor="w",
+        )
+        title_label.grid(row=0, column=2, padx=10, sticky="ew", fill="x")
+
+        # 进度
+        progress_label = ctk.CTkLabel(
+            item_frame, text=f"0/{task.total_chapters or '?'}",
+            font=self._font(-3), text_color="gray50",
+            width=80,
+        )
+        progress_label.grid(row=0, column=3, padx=5, sticky="e")
+
+        # 删除按钮
+        del_btn = ctk.CTkButton(
+            item_frame, text="×", width=28, height=28, corner_radius=6,
+            font=self._font(2), fg_color="transparent",
+            text_color=("gray40", "gray60"), hover_color=Colors.DANGER,
+            command=lambda tid=task.task_id: self._remove_single_task(tid),
+        )
+        del_btn.grid(row=0, column=4, padx=(5, 10), sticky="e")
+
+        item_frame.grid_columnconfigure(2, weight=1)
+
+        self._queue_widgets[task.task_id] = {
+            "frame": item_frame, "var": var, "status": status_label,
+            "title": title_label, "progress": progress_label,
+        }
+
+    def _remove_single_task(self, task_id: str):
+        with self._queue_lock:
+            self._task_queue = [t for t in self._task_queue if t.task_id != task_id]
+        if task_id in self._queue_widgets:
+            for w in self._queue_widgets[task_id].values():
+                if hasattr(w, 'destroy'):
+                    w.destroy()
+            del self._queue_widgets[task_id]
+        self._refresh_queue_ui()
+
+    def _update_queue_item_ui(self, task: DownloadTask):
+        """更新单个任务项的 UI 显示"""
+        def _update():
+            if task.task_id not in self._queue_widgets:
+                return
+            widgets = self._queue_widgets[task.task_id]
+
+            status_colors = {
+                TaskStatus.PENDING: "gray50",
+                TaskStatus.RUNNING: Colors.PRIMARY,
+                TaskStatus.DONE: Colors.SUCCESS,
+                TaskStatus.FAILED: Colors.DANGER,
+                TaskStatus.STOPPED: Colors.WARNING,
+            }
+            widgets["status"].configure(
+                text=task.status.value,
+                text_color=status_colors.get(task.status, "gray50"),
+            )
+            widgets["progress"].configure(
+                text=f"{task.downloaded_chapters}/{task.total_chapters or '?'}"
+            )
+            if task.book_title:
+                title_text = task.book_title
+                if len(title_text) > 50:
+                    title_text = title_text[:47] + "..."
+                widgets["title"].configure(text=title_text)
+
+        self.after(0, _update)
+
+    # ── 按钮回调 ────────────────────────────────────────────
+
+    def _on_start(self):
+        # 如果队列为空，从当前 UI 创建临时任务
+        with self._queue_lock:
+            has_queue = len(self._task_queue) > 0
+
+        if not has_queue:
+            errors = self._apply_ui_to_config()
+            if errors:
+                self._log("\n".join(f"[x] {e}" for e in errors) + "\n")
+                return
+            if not config.bookURL:
+                self._log("[x] 请填写书籍章节链接或添加到队列\n")
+                return
+            task = self._snapshot_task_from_ui()
+            with self._queue_lock:
+                self._task_queue.append(task)
+            self._refresh_queue_ui()
 
         self._stop_event.clear()
         self._running = True
         self.btn_start.configure(state="disabled")
         self.btn_stop.configure(state="normal")
         self._set_progress(0)
-        self._set_status("下载中...")
+        self._set_status("队列执行中...")
 
-        t = threading.Thread(target=self._run_download, daemon=True)
-        t.start()
+        self._worker_thread = threading.Thread(target=self._run_queue_worker, daemon=True)
+        self._worker_thread.start()
 
     def _on_stop(self):
         self._stop_event.set()
@@ -625,9 +936,36 @@ class NovalPieApp(ctk.CTk):
     def _on_clear_log(self):
         self.text_log.delete("1.0", "end")
 
-    # ── 下载逻辑（线程） ───────────────────────────────────
+    # ── 队列工作线程 ────────────────────────────────────────
 
-    def _run_download(self):
+    def _run_queue_worker(self):
+        """顺序执行任务队列"""
+        while not self._stop_event.is_set():
+            with self._queue_lock:
+                pending = [t for t in self._task_queue if t.status == TaskStatus.PENDING]
+                if not pending:
+                    break
+                task = pending[0]
+
+            task.status = TaskStatus.RUNNING
+            self._update_queue_item_ui(task)
+
+            # 执行单个任务（独立配置 + 独立缓存）
+            self._execute_single_task(task)
+
+            # 任务完成后释放内存
+            task.release_memory()
+
+            if task.status == TaskStatus.RUNNING:
+                task.status = TaskStatus.DONE
+            self._update_queue_item_ui(task)
+
+        # 队列完成或停止
+        self._running = False
+        self.after(0, self._download_finished)
+
+    def _execute_single_task(self, task: DownloadTask):
+        """执行单个下载任务，使用独立配置和缓存"""
         old_stdout = sys.stdout
         old_stderr = sys.stderr
         handler = TextHandler(self._log)
@@ -635,25 +973,30 @@ class NovalPieApp(ctk.CTk):
         sys.stderr = handler
 
         try:
-            self._do_download()
+            self._do_task(task)
+        except KeyboardInterrupt:
+            task.status = TaskStatus.STOPPED
+            print("[!] 任务已停止")
         except Exception as e:
-            print(f"[x] 未预期的错误: {e}")
+            task.status = TaskStatus.FAILED
+            print(f"[x] 任务失败: {e}")
             traceback.print_exc()
         finally:
             sys.stdout = old_stdout
             sys.stderr = old_stderr
-            self._running = False
-            self.after(0, self._download_finished)
 
-    def _do_download(self):
-        parsed_base = urlparse(config.base_url)
-        parsed_book = urlparse(config.bookURL)
+    # ── 单任务下载逻辑 ──────────────────────────────────────
+
+    def _do_task(self, task: DownloadTask):
+        """执行单个任务，不依赖全局 config"""
+        parsed_base = urlparse(task.base_url)
+        parsed_book = urlparse(task.book_url)
         if parsed_base.scheme != parsed_book.scheme or parsed_base.netloc != parsed_book.netloc:
             print("[x] base_url 和 bookURL 域名不一致")
             return
 
-        cookie_line = utils.read_cookie_line(config.cookieFilePath)
-        auth_token = utils.read_auth_token(config.cookieFilePath)
+        cookie_line = utils.read_cookie_line(task.cookie_path)
+        auth_token = utils.read_auth_token(task.cookie_path)
         if cookie_line:
             print("[*] Cookie 已加载")
         if auth_token:
@@ -662,14 +1005,16 @@ class NovalPieApp(ctk.CTk):
             print("[*] 未找到认证信息，继续无认证模式")
 
         try:
-            book_id, start_chapter_id = network.parse_book_url(config.bookURL)
+            book_id, start_chapter_id = network.parse_book_url(task.book_url)
         except Exception as e:
             print(f"[x] 无效的 bookURL: {e}")
             return
 
         session = network.make_session(cookie_line, auth_token=auth_token)
 
+        # 独立缓存：每个任务加载自己的缓存文件
         chapter_cache = cache.load_chapter_cache(book_id)
+        task._chapter_cache = chapter_cache  # 绑定到任务
         if chapter_cache:
             print(f"[*] 已加载 {len(chapter_cache)} 个缓存章节")
 
@@ -684,30 +1029,33 @@ class NovalPieApp(ctk.CTk):
             print(f"[!] API 获取失败: {e}")
 
         if not chapter_refs:
-            chapter_refs = network.fetch_chapter_list_via_html(session, book_id, config.bookURL)
+            chapter_refs = network.fetch_chapter_list_via_html(session, book_id, task.book_url)
             print(f"[*] 章节列表来源: HTML, 数量={len(chapter_refs)}")
 
         if not chapter_refs:
             print("[x] 未找到章节列表，请检查链接和 Cookie")
             return
 
-        start_idx = utils.pick_start_index(chapter_refs, start_chapter_id, config.startFromCurrentChapter)
+        start_idx = utils.pick_start_index(chapter_refs, start_chapter_id, task.start_from_current)
         chapter_refs = chapter_refs[start_idx:]
 
-        if config.maxChapters > 0:
-            chapter_refs = chapter_refs[:config.maxChapters]
+        if task.max_chapters > 0:
+            chapter_refs = chapter_refs[:task.max_chapters]
 
         if not chapter_refs:
             print("[x] 过滤后无章节可下载")
             return
 
-        meta = network.fetch_book_meta(session, book_id, config.bookURL)
+        meta = network.fetch_book_meta(session, book_id, task.book_url)
+        task.book_title = meta.title
+        self._update_queue_item_ui(task)
+        task.total_chapters = len(chapter_refs)
+
         print(f"[*] 书名: {meta.title}")
         if meta.author:
             print(f"[*] 作者: {meta.author}")
         print(f"[*] 待下载章节: {len(chapter_refs)}")
 
-        # 计时器
         _t_start = time.monotonic()
         _t_last = _t_start
 
@@ -727,22 +1075,24 @@ class NovalPieApp(ctk.CTk):
             elapsed = now - _t_start
             interval = now - _t_last
 
+            task.downloaded_chapters = current
+            self._update_queue_item_ui(task)
+
             if interval > 0:
-                rate_ch = current / elapsed  # 章节/秒
+                rate_ch = current / elapsed
                 eta = (total - current) / rate_ch if rate_ch > 0 else 0
                 status = (
-                    f"下载中 ({current}/{total}) | "
+                    f"[{task.book_title}] 下载中 ({current}/{total}) | "
                     f"耗时 {_format_duration(elapsed)} | "
                     f"速率 {rate_ch:.2f}章/s | "
                     f"预计剩余 {_format_duration(eta)}"
                 )
             else:
-                status = f"下载中 ({current}/{total})"
+                status = f"[{task.book_title}] 下载中 ({current}/{total})"
             self._set_status(status)
             self._set_progress(current / total if total > 0 else 0)
             _t_last = now
 
-        # Monkey-patch print_progress 以更新进度条和统计
         _orig_print_progress = utils.print_progress
         def _gui_print_progress(current: int, total: int, title: str):
             _orig_print_progress(current, total, title)
@@ -752,7 +1102,7 @@ class NovalPieApp(ctk.CTk):
         # Monkey-patch sleep_between 以支持停止
         _orig_sleep = utils.sleep_between
         def _checkable_sleep(min_sec: float, max_sec: float):
-            import random, time
+            import random, time as _t
             delay = max(min_sec, min(max_sec, random.uniform(min_sec, max_sec)))
             step = 0.2
             elapsed = 0.0
@@ -760,7 +1110,7 @@ class NovalPieApp(ctk.CTk):
                 if self._stop_event.is_set():
                     return
                 s = min(step, delay - elapsed)
-                time.sleep(s)
+                _t.sleep(s)
                 elapsed += s
         utils.sleep_between = _checkable_sleep
 
@@ -783,21 +1133,45 @@ class NovalPieApp(ctk.CTk):
                     _t.sleep(min(0.5, remaining))
         browser.wait_for_chapter_text = _checkable_wait
 
+        # 使用任务独立配置覆盖全局 config（仅用于 browser 模块读取）
+        _saved_config = {
+            'chapterDelayMinSec': config.chapterDelayMinSec,
+            'chapterDelayMaxSec': config.chapterDelayMaxSec,
+            'chapterReadyTimeoutSec': config.chapterReadyTimeoutSec,
+            'retryPerChapter': config.retryPerChapter,
+            'firstChapterExtraWaitSec': config.firstChapterExtraWaitSec,
+            'headless': config.headless,
+            'keepFailedChapterPlaceholder': config.keepFailedChapterPlaceholder,
+            'base_url': config.base_url,
+        }
+        config.chapterDelayMinSec = task.delay_min
+        config.chapterDelayMaxSec = task.delay_max
+        config.chapterReadyTimeoutSec = task.timeout
+        config.retryPerChapter = task.retry
+        config.firstChapterExtraWaitSec = task.first_wait
+        config.headless = task.headless
+        config.keepFailedChapterPlaceholder = task.keep_failed
+        config.base_url = task.base_url
+
         try:
             chapters, failed_chapters, chapter_cache = browser.download_chapters_with_browser(
                 chapter_refs, cookie_line, chapter_cache, auth_token=auth_token, book_id=book_id
             )
+            task._chapters_result = chapters
+            task._failed_chapters = failed_chapters
         finally:
             utils.print_progress = _orig_print_progress
             utils.sleep_between = _orig_sleep
             browser.wait_for_chapter_text = _orig_wait
+            # 恢复全局 config
+            for k, v in _saved_config.items():
+                setattr(config, k, v)
 
-        # 打印下载统计
         _t_end = time.monotonic()
         _total_elapsed = _t_end - _t_start
         _total_chars = sum(len(ch.text) for ch in chapters)
         print(f"\n{'='*50}")
-        print(f"[*] 下载统计")
+        print(f"[*] [{meta.title}] 下载统计")
         print(f"    总耗时: {_format_duration(_total_elapsed)}")
         print(f"    成功: {len(chapters)} 章")
         print(f"    失败: {len(failed_chapters)} 章")
@@ -808,42 +1182,60 @@ class NovalPieApp(ctk.CTk):
         print(f"{'='*50}\n")
 
         if self._stop_event.is_set():
+            task.status = TaskStatus.STOPPED
             print("[!] 下载已被用户停止")
             if chapters:
-                self._save_output(meta, chapters, failed_chapters, chapter_cache, book_id, session)
+                self._save_task_output(task, meta, chapters, failed_chapters, chapter_cache, book_id, session)
             return
 
         if not chapters:
+            task.status = TaskStatus.FAILED
             print("[x] 所有章节下载失败，无输出")
             return
 
-        self._save_output(meta, chapters, failed_chapters, chapter_cache, book_id, session)
+        task.status = TaskStatus.DONE
+        self._save_task_output(task, meta, chapters, failed_chapters, chapter_cache, book_id, session)
 
-    def _save_output(self, meta, chapters, failed_chapters, chapter_cache, book_id, session):
-        cache.save_chapter_cache(book_id, list(chapter_cache.values()))
-        print(f"[*] 已缓存 {len(chapter_cache)} 个章节")
+    def _save_task_output(self, task, meta, chapters, failed_chapters, chapter_cache, book_id, session):
+        """保存任务输出，使用任务独立的输出目录"""
+        # 使用任务配置中的输出目录
+        _saved_dirs = {
+            'epubOutputDir': config.epubOutputDir,
+            'txtOutputDir': config.txtOutputDir,
+            'cacheOutputDir': config.cacheOutputDir,
+        }
+        config.epubOutputDir = task.epub_dir
+        config.txtOutputDir = task.txt_dir
+        config.cacheOutputDir = task.cache_dir
 
-        Path(config.epubOutputDir).mkdir(parents=True, exist_ok=True)
-        Path(config.txtOutputDir).mkdir(parents=True, exist_ok=True)
+        try:
+            cache.save_chapter_cache(book_id, list(chapter_cache.values()))
+            print(f"[*] 已缓存 {len(chapter_cache)} 个章节")
 
-        file_stem = utils.clean_filename(meta.title)
+            Path(task.epub_dir).mkdir(parents=True, exist_ok=True)
+            Path(task.txt_dir).mkdir(parents=True, exist_ok=True)
 
-        if failed_chapters:
-            failed_path = Path(config.txtOutputDir) / f"{file_stem}_failed.txt"
-            exporters.save_failed_report(meta, failed_chapters, failed_path)
-            print(f"[*] 失败报告: {failed_path.resolve()}")
+            file_stem = utils.clean_filename(meta.title)
 
-        epub_path = Path(config.epubOutputDir) / f"{file_stem}.epub"
-        txt_path = Path(config.txtOutputDir) / f"{file_stem}.txt"
+            if failed_chapters:
+                failed_path = Path(task.txt_dir) / f"{file_stem}_failed.txt"
+                exporters.save_failed_report(meta, failed_chapters, failed_path)
+                print(f"[*] 失败报告: {failed_path.resolve()}")
 
-        exporters.build_epub(meta, chapters, epub_path, session)
-        exporters.save_txt(meta, chapters, txt_path)
+            epub_path = Path(task.epub_dir) / f"{file_stem}.epub"
+            txt_path = Path(task.txt_dir) / f"{file_stem}.txt"
 
-        print("[*] 下载完成!")
-        print(f"[*] EPUB: {epub_path.resolve()}")
-        print(f"[*] TXT : {txt_path.resolve()}")
-        print(f"[*] 成功: {len(chapters)} 章")
-        print(f"[*] 失败: {len(failed_chapters)} 章")
+            exporters.build_epub(meta, chapters, epub_path, session)
+            exporters.save_txt(meta, chapters, txt_path)
+
+            print("[*] 下载完成!")
+            print(f"[*] EPUB: {epub_path.resolve()}")
+            print(f"[*] TXT : {txt_path.resolve()}")
+            print(f"[*] 成功: {len(chapters)} 章")
+            print(f"[*] 失败: {len(failed_chapters)} 章")
+        finally:
+            for k, v in _saved_dirs.items():
+                setattr(config, k, v)
 
     def _download_finished(self):
         self.btn_start.configure(state="normal")
@@ -852,7 +1244,7 @@ class NovalPieApp(ctk.CTk):
             self._set_status("已停止")
         else:
             self._set_progress(1.0)
-            self._set_status("下载完成")
+            self._set_status("队列完成")
 
 
 def run_gui():

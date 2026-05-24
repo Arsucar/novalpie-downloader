@@ -16,20 +16,20 @@ cookieFilePath = "./novalpie.txt"
 headless = True
 
 # chapterDelayMinSec / chapterDelayMaxSec：章节访问间隔（秒）
-chapterDelayMinSec = 1.0
-chapterDelayMaxSec = 1.5
+chapterDelayMinSec = 2.0
+chapterDelayMaxSec = 3.0
 
 # firstChapterExtraWaitSec：首章额外等待时间（秒）
-firstChapterExtraWaitSec = 3.0
+firstChapterExtraWaitSec = 10.0
 
 # chapterReadyTimeoutSec：单章正文等待超时（秒）
-chapterReadyTimeoutSec = 20.0
+chapterReadyTimeoutSec = 35.0
 
 # pageGotoTimeoutMs：页面加载超时（毫秒）
 pageGotoTimeoutMs = 130000
 
 # retryPerChapter：单章失败重试次数
-retryPerChapter = 2
+retryPerChapter = 4
 
 # maxChapters：最多抓取章节数，0 表示不限制
 maxChapters = 0

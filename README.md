@@ -1,4 +1,6 @@
 ﻿# novalpie 小说导出工具（EPUB/TXT）
+不知道这个工具有什么用，但是 it works
+适合机翻站注册未满60天的用户，我是神经病
 
 基于 `Python + Playwright` 的 `novalpie.cc` 小说抓取工具，支持命令行和 GUI 两种使用方式。
 
