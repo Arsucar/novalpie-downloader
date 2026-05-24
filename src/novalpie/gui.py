@@ -29,6 +29,8 @@ class Colors:
     PRIMARY_HOVER = "#1E6CB8"
     SUCCESS = "#27AE60"
     SUCCESS_HOVER = "#1E8449"
+    WARNING = "#F39C12"
+    WARNING_HOVER = "#D68910"
     DANGER = "#E74C3C"
     DANGER_HOVER = "#C0392B"
     CARD_LIGHT = "gray95"
@@ -212,23 +214,62 @@ class NovalPieApp(ctk.CTk):
         dl_card = self._create_card(scroll_frame, "下载设置", "⚙️")
         dl_card.grid_columnconfigure((0, 1), weight=1)
 
+        # 预设方案按钮
+        preset_frame = ctk.CTkFrame(dl_card, fg_color="transparent")
+        preset_frame.grid(row=0, column=0, columnspan=2, sticky="ew", padx=5, pady=(0, 5))
+        preset_frame.grid_columnconfigure((0, 1, 2, 3), weight=1)
+
+        ctk.CTkLabel(
+            preset_frame, text="预设方案:",
+            font=self._font(-1),
+            text_color=("gray50", "gray60"),
+        ).grid(row=0, column=0, sticky="w", padx=(0, 5))
+
+        btn_conservative = ctk.CTkButton(
+            preset_frame, text="保守", height=28, corner_radius=6,
+            font=self._font(-2),
+            fg_color=Colors.PRIMARY, hover_color=Colors.PRIMARY_HOVER,
+            command=self._apply_preset_conservative,
+        )
+        btn_conservative.grid(row=0, column=1, padx=2)
+        self._register_font(btn_conservative, "button", {"offset": -2})
+
+        btn_balanced = ctk.CTkButton(
+            preset_frame, text="均衡", height=28, corner_radius=6,
+            font=self._font(-2),
+            fg_color=Colors.PRIMARY, hover_color=Colors.PRIMARY_HOVER,
+            command=self._apply_preset_balanced,
+        )
+        btn_balanced.grid(row=0, column=2, padx=2)
+        self._register_font(btn_balanced, "button", {"offset": -2})
+
+        btn_aggressive = ctk.CTkButton(
+            preset_frame, text="激进", height=28, corner_radius=6,
+            font=self._font(-2),
+            fg_color=Colors.WARNING, hover_color=Colors.WARNING_HOVER,
+            command=self._apply_preset_aggressive,
+        )
+        btn_aggressive.grid(row=0, column=3, padx=2)
+        self._register_font(btn_aggressive, "button", {"offset": -2})
+
+        # 输入行
         self.entry_delay_min = self._create_inline_input(
-            dl_card, "章节间隔(秒) 最小", str(config.chapterDelayMinSec), row=0, col=0,
+            dl_card, "章节间隔(秒) 最小", str(config.chapterDelayMinSec), row=1, col=0,
         )
         self.entry_delay_max = self._create_inline_input(
-            dl_card, "最大", str(config.chapterDelayMaxSec), row=0, col=1,
+            dl_card, "最大", str(config.chapterDelayMaxSec), row=1, col=1,
         )
         self.entry_timeout = self._create_inline_input(
-            dl_card, "章节超时(秒)", str(config.chapterReadyTimeoutSec), row=1, col=0,
+            dl_card, "章节超时(秒)", str(config.chapterReadyTimeoutSec), row=2, col=0,
         )
         self.entry_retry = self._create_inline_input(
-            dl_card, "重试次数", str(config.retryPerChapter), row=1, col=1,
+            dl_card, "重试次数", str(config.retryPerChapter), row=2, col=1,
         )
         self.entry_max_chapters = self._create_inline_input(
-            dl_card, "最大章节数 (0=不限)", str(config.maxChapters), row=2, col=0,
+            dl_card, "最大章节数 (0=不限)", str(config.maxChapters), row=3, col=0,
         )
         self.entry_first_wait = self._create_inline_input(
-            dl_card, "首章额外等待(秒)", str(config.firstChapterExtraWaitSec), row=2, col=1,
+            dl_card, "首章额外等待(秒)", str(config.firstChapterExtraWaitSec), row=3, col=1,
         )
 
         # ── 选项卡片 ──
@@ -453,6 +494,37 @@ class NovalPieApp(ctk.CTk):
         self._register_font(sw, "switch", {"offset": -1})
 
         return sw
+
+    # ── 预设方案 ────────────────────────────────────────────
+
+    def _apply_preset(self, delay_min: float, delay_max: float, timeout: float, retry: int, first_wait: float):
+        if not hasattr(self, 'entry_delay_min'):
+            return
+        self.entry_delay_min.delete(0, "end")
+        self.entry_delay_min.insert(0, str(delay_min))
+        self.entry_delay_max.delete(0, "end")
+        self.entry_delay_max.insert(0, str(delay_max))
+        self.entry_timeout.delete(0, "end")
+        self.entry_timeout.insert(0, str(timeout))
+        self.entry_retry.delete(0, "end")
+        self.entry_retry.insert(0, str(retry))
+        self.entry_first_wait.delete(0, "end")
+        self.entry_first_wait.insert(0, str(first_wait))
+
+    def _apply_preset_conservative(self):
+        """保守：间隔 1.0~1.5s，超时 20s，重试 2 次，首章 3s"""
+        self._apply_preset(1.0, 1.5, 20, 2, 3)
+        self._log("[*] 已应用预设: 保守\n")
+
+    def _apply_preset_balanced(self):
+        """均衡：间隔 0.8~1.2s，超时 15s，重试 2 次，首章 2s"""
+        self._apply_preset(0.8, 1.2, 15, 2, 2)
+        self._log("[*] 已应用预设: 均衡\n")
+
+    def _apply_preset_aggressive(self):
+        """激进：间隔 0.5~1.0s，超时 15s，重试 1 次，首章 1s"""
+        self._apply_preset(0.5, 1.0, 15, 1, 1)
+        self._log("[*] 已应用预设: 激进（注意封号风险）\n")
 
     # ── 字体大小滑块回调 ────────────────────────────────────
 
