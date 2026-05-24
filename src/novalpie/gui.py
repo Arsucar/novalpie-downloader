@@ -58,9 +58,9 @@ class TextHandler(io.TextIOBase):
 
 class NovalPieApp(ctk.CTk):
     # 默认字体大小
-    DEFAULT_FONT_SIZE = 14
-    FONT_SIZE_MIN = 10
-    FONT_SIZE_MAX = 24
+    DEFAULT_FONT_SIZE = 20
+    FONT_SIZE_MIN = 15
+    FONT_SIZE_MAX = 30
 
     def __init__(self):
         super().__init__()
