@@ -48,6 +48,14 @@ def build_epub(
     toc_items = []
     spine_items = ["nav"]
 
+    # 下载封面
+    cover_image_data = None
+    cover_ext = ""
+    if book_meta.cover_url:
+        blob = network.download_image_blob(session, book_meta.cover_url)
+        if blob:
+            cover_image_data, cover_media_type, cover_ext = blob
+
     image_file_by_url: dict[str, str] = {}
     image_count = 0
 
@@ -96,10 +104,38 @@ def build_epub(
         for tag in book_meta.tags:
             book.add_metadata('DC', 'subject', tag)
 
+    # 设置封面
+    if cover_image_data:
+        cover_file_name = f"images/cover{cover_ext}"
+        cover_item = epub.EpubImage(
+            uid="cover-image",
+            file_name=cover_file_name,
+            media_type=cover_media_type,
+            content=cover_image_data,
+        )
+        book.add_item(cover_item)
+        book.set_cover(cover_file_name, cover_image_data)
+
     book.toc = tuple(toc_items)
     book.spine = spine_items
     book.add_item(epub.EpubNcx())
-    book.add_item(epub.EpubNav())
+
+    # 创建隐藏目录的 nav
+    nav = epub.EpubNav()
+    nav.content = f'''<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html epub:prefix="z3998: http://www.daisy.org/z3998/2012/vocab/structure/#" lang="zh" xmlns="http://www.w3.org/1999/xhtml" xmlns:epub="http://www.idpf.org/2007/ops">
+<head><meta charset="utf-8"/><title>目录</title></head>
+<body>
+<nav epub:type="toc" id="id" role="doc-toc" hidden="hidden">
+<h2>{html.escape(book_meta.title)}</h2>
+<ol>
+{chr(10).join(f'<li><a href="chapter_{i:05d}.xhtml">{html.escape(ch.title)}</a></li>' for i, ch in enumerate(chapters, start=1))}
+</ol>
+</nav>
+</body>
+</html>'''
+    book.add_item(nav)
 
     epub.write_epub(str(output_path), book, {})
 

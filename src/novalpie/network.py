@@ -155,6 +155,7 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
     author = ""
     description = ""
     tags: list[str] = []
+    cover_url = ""
 
     book_url = utils.absolute_url(f"/book/{book_id}")
 
@@ -168,6 +169,7 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
                 title = utils.normalize_text(payload.get("title", ""))
                 author = utils.normalize_text(payload.get("author_name", ""))
                 novel_type = utils.normalize_text(payload.get("novel_type", ""))
+                cover_url = payload.get("photo_true_url") or payload.get("photo_url") or ""
                 if novel_type:
                     tags.append(novel_type)
     except Exception as e:
@@ -358,7 +360,7 @@ def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -
 
     if not title:
         title = f"book_{book_id}"
-    return config.BookMeta(title=title, author=author, description=description, tags=tags)
+    return config.BookMeta(title=title, author=author, description=description, tags=tags, cover_url=cover_url)
 
 def download_image_blob(session: requests.Session, url: str) -> tuple[bytes, str, str] | None:
     try:
