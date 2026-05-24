@@ -44,7 +44,7 @@ except Exception:  # pragma: no cover
 # ---------------------------------------------------------------------------
 
 # bookURL：起始章节链接（必改）
-bookURL = "https://novalpie.cc/book/353690/8853740"
+bookURL = "https://novalpie.cc/book/353690/9581373"
 
 # base_url：站点根地址，需与 bookURL 同域名
 base_url = "https://novalpie.cc/"
@@ -159,6 +159,8 @@ class FailedChapter:
 class BookMeta:
     title: str
     author: str
+    description: str = ""
+    tags: list[str] = field(default_factory=list)
 
 def clean_filename(name: str) -> str:
     name = re.sub(r"[\\/:*?\"<>|]", "_", (name or "").strip())
@@ -574,38 +576,188 @@ def fetch_chapter_list_via_html(session: requests.Session, book_id: int, start_u
 def fetch_book_meta(session: requests.Session, book_id: int, chapter_url: str) -> BookMeta:
     title = ""
     author = ""
-    candidates = [absolute_url(f"/book/{book_id}"), chapter_url]
-    for u in candidates:
+    description = ""
+    tags: list[str] = []
+    
+    book_url = absolute_url(f"/book/{book_id}")
+    
+    if sync_playwright is not None:
         try:
-            r = session.get(u, timeout=(chapterReadyTimeoutSec, chapterReadyTimeoutSec))
-            r.raise_for_status()
-        except Exception:
-            continue
-        soup = BeautifulSoup(r.text, "lxml")
-        if not title:
-            h1 = soup.select_one("h1")
-            if h1:
-                t = normalize_text(h1.get_text(" ", strip=True))
-                if t:
-                    title = t
-        if not title:
-            meta = soup.select_one("meta[property='og:title'], meta[name='og:title']")
-            if meta:
-                t = normalize_text(meta.get("content", ""))
-                if t:
-                    title = t
-        if not author:
-            author_link = soup.select_one("a[href*='author=']")
-            if author_link:
-                a_text = normalize_text(author_link.get_text(" ", strip=True))
-                if a_text:
-                    author = a_text
-        if title and author:
-            break
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=headless)
+                context = browser.new_context(user_agent=DEFAULT_HEADERS["User-Agent"], locale="zh-CN")
+                if session.cookies:
+                    for cookie in session.cookies:
+                        context.add_cookies([{
+                            "name": cookie.name,
+                            "value": cookie.value,
+                            "domain": cookie.domain,
+                            "path": cookie.path,
+                        }])
+                page = context.new_page()
+                page.goto(book_url, wait_until="domcontentloaded", timeout=pageGotoTimeoutMs)
+                page.wait_for_timeout(3000)
+                
+                soup = BeautifulSoup(page.content(), "lxml")
+                
+                if not title:
+                    h1 = soup.select_one("h1")
+                    if h1:
+                        t = normalize_text(h1.get_text(" ", strip=True))
+                        if t:
+                            title = t
+                if not title:
+                    title_tag = soup.find("title")
+                    if title_tag:
+                        t = normalize_text(title_tag.get_text(" ", strip=True))
+                        if t and "-" in t:
+                            t = t.split("-")[0].strip()
+                            if t:
+                                title = t
+                if not title:
+                    meta = soup.select_one("meta[property='og:title'], meta[name='og:title']")
+                    if meta:
+                        t = normalize_text(meta.get("content", ""))
+                        if t:
+                            title = t
+                
+                if not description:
+                    meta_desc = soup.select_one("meta[property='og:description'], meta[name='description']")
+                    if meta_desc:
+                        d = normalize_text(meta_desc.get("content", ""))
+                        if d:
+                            description = d
+                            if not author:
+                                author_match = re.search(r"作者[：:]?\s*([^，。！？]+)", d)
+                                if author_match:
+                                    author = normalize_text(author_match.group(1))
+                
+                if not author:
+                    meta_author = soup.select_one("meta[property='og:author'], meta[name='author']")
+                    if meta_author:
+                        a_text = normalize_text(meta_author.get("content", ""))
+                        if a_text:
+                            author = a_text
+                
+                if not author:
+                    author_link = soup.select_one("a[href*='author=']")
+                    if author_link:
+                        a_text = normalize_text(author_link.get_text(" ", strip=True))
+                        if a_text:
+                            author = a_text
+                
+                if not description:
+                    desc_els = soup.select(".description, .summary, #description, .intro, [class*=desc]")
+                    for el in desc_els:
+                        d = normalize_text(el.get_text(" ", strip=True))
+                        if d and len(d) > 20:
+                            description = d
+                            if not author:
+                                author_match = re.search(r"作者[：:]?\s*([^，。！？]+)", d)
+                                if author_match:
+                                    author = normalize_text(author_match.group(1))
+                            break
+                
+                if not tags:
+                    tag_selectors = [
+                        ".tags a", ".category a", ".genre a", 
+                        "a[href*='tag']", "a[href*='category']",
+                        ".tag a", ".tags span", ".genre span"
+                    ]
+                    for selector in tag_selectors:
+                        tag_els = soup.select(selector)
+                        for el in tag_els:
+                            tag_text = normalize_text(el.get_text(" ", strip=True))
+                            if tag_text and len(tag_text) > 1:
+                                tags.append(tag_text)
+                    tags = unique_keep_order(tags)[:10]
+                
+                context.close()
+                browser.close()
+        except Exception as e:
+            print(f"[!] Playwright error in fetch_book_meta: {e}", file=sys.stderr)
+    
+    if not title:
+        candidates = [book_url, chapter_url]
+        for u in candidates:
+            try:
+                r = session.get(u, timeout=(chapterReadyTimeoutSec, chapterReadyTimeoutSec))
+                r.raise_for_status()
+            except Exception:
+                continue
+            soup = BeautifulSoup(r.text, "lxml")
+            if not title:
+                h1 = soup.select_one("h1")
+                if h1:
+                    t = normalize_text(h1.get_text(" ", strip=True))
+                    if t:
+                        title = t
+            if not title:
+                title_tag = soup.find("title")
+                if title_tag:
+                    t = normalize_text(title_tag.get_text(" ", strip=True))
+                    if t and "-" in t:
+                        t = t.split("-")[0].strip()
+                        if t:
+                            title = t
+            if not title:
+                meta = soup.select_one("meta[property='og:title'], meta[name='og:title']")
+                if meta:
+                    t = normalize_text(meta.get("content", ""))
+                    if t:
+                        title = t
+            if not description:
+                meta_desc = soup.select_one("meta[property='og:description'], meta[name='description']")
+                if meta_desc:
+                    d = normalize_text(meta_desc.get("content", ""))
+                    if d:
+                        description = d
+                        if not author:
+                            author_match = re.search(r"作者[：:]?\s*([^，。！？]+)", d)
+                            if author_match:
+                                author = normalize_text(author_match.group(1))
+            if not author:
+                meta_author = soup.select_one("meta[property='og:author'], meta[name='author']")
+                if meta_author:
+                    a_text = normalize_text(meta_author.get("content", ""))
+                    if a_text:
+                        author = a_text
+            if not author:
+                author_link = soup.select_one("a[href*='author=']")
+                if author_link:
+                    a_text = normalize_text(author_link.get_text(" ", strip=True))
+                    if a_text:
+                        author = a_text
+            if not description:
+                desc_els = soup.select(".description, .summary, #description, .intro, [class*=desc]")
+                for el in desc_els:
+                    d = normalize_text(el.get_text(" ", strip=True))
+                    if d and len(d) > 20:
+                        description = d
+                        if not author:
+                            author_match = re.search(r"作者[：:]?\s*([^，。！？]+)", d)
+                            if author_match:
+                                author = normalize_text(author_match.group(1))
+                        break
+            if not tags:
+                tag_selectors = [
+                    ".tags a", ".category a", ".genre a", 
+                    "a[href*='tag']", "a[href*='category']",
+                    ".tag a", ".tags span", ".genre span"
+                ]
+                for selector in tag_selectors:
+                    tag_els = soup.select(selector)
+                    for el in tag_els:
+                        tag_text = normalize_text(el.get_text(" ", strip=True))
+                        if tag_text and len(tag_text) > 1:
+                            tags.append(tag_text)
+                tags = unique_keep_order(tags)[:10]
+            if title and author and description and tags:
+                break
 
     if not title:
         title = f"book_{book_id}"
-    return BookMeta(title=title, author=author)
+    return BookMeta(title=title, author=author, description=description, tags=tags)
 
 
 def pick_start_index(chapters: list[ChapterRef], start_chapter_id: int, from_current: bool) -> int:
@@ -991,6 +1143,8 @@ def build_epub(
     book.set_title(book_meta.title)
     if book_meta.author:
         book.add_author(book_meta.author)
+    if book_meta.description:
+        book.add_metadata('DC', 'description', book_meta.description)
 
     toc_items = []
     spine_items = ["nav"]
@@ -1022,18 +1176,23 @@ def build_epub(
             chapter_image_files.append(file_name)
 
         chapter_image_files = unique_keep_order(chapter_image_files)
+        
+        chapter_text = ch.text
+        if i == 1 and book_meta.tags:
+            tags_text = "标签：" + "，".join(book_meta.tags)
+            chapter_text = tags_text + "\n\n" + chapter_text
+        
         item = epub.EpubHtml(
             title=ch.title,
             file_name=f"chapter_{i:05d}.xhtml",
             lang="zh",
             uid=f"chapter_{i:05d}",
         )
-        item.content = chapter_to_html(ch.title, ch.text, chapter_image_files)
+        item.content = chapter_to_html(ch.title, chapter_text, chapter_image_files)
         book.add_item(item)
-        toc_items.append(item)
         spine_items.append(item)
 
-    book.toc = tuple(toc_items)
+    book.toc = tuple([])
     book.spine = spine_items
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())
